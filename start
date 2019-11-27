@@ -1,0 +1,25 @@
+#!/bin/bash -x
+#
+# run as root from /etc/rc.local
+#
+PROGRAM=/home/pi/convert.py
+#
+# set to a file to debug what is happening
+#LOG="/tmp/alarm.log"
+LOG="/dev/null"
+PPM=0
+PIDCNVRT=/tmp/pidcnvrt.txt
+source /home/pi/functions.sh
+
+if [ -e "${PIDCNVRT}" ]; then
+  kill  $(<"${PIDCNVRT}")
+fi
+killall rtl_433
+
+nohup ${PROGRAM}  > ${LOG} 2>&1 &
+echo $! > "${PIDCNVRT}"
+
+# log message
+${PSQL} "insert into actions (action,cause) values ('restart listener','restart');"
+
+echo "end"

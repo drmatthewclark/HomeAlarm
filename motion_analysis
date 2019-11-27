@@ -1,0 +1,3 @@
+query="select time, count(time) from (select date_trunc('hour', time) as time    from events where source = 'motion_waverly' and flag = true group by time, date_trunc('hour', time) order by time desc) a group by a.time order by a.time desc;"
+
+psql --tuples-only -U alarm  -A -c "${query}"

@@ -1,0 +1,83 @@
+#! /usr/bin/python3.5
+import sys
+import pychromecast
+import os
+import os.path
+from gtts import gTTS
+import time
+import hashlib
+import socket
+from multiprocessing import Process
+import datetime
+
+def speak(ip, say, volume):
+   #
+   # speak something on GoogleHome
+   #
+   #********* retrieve local ip of my rpi3
+   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+   s.connect(("8.8.8.8", 80))
+   local_ip=s.getsockname()[0]
+   local_ip="192.168.20.26"
+   s.close()
+   #**********************
+   # replace underscores with spaces 
+   say = say.replace("_", " ")
+   fname="/5920ddcqeag/" + hashlib.md5(say.encode()).hexdigest()+".mp3"; #create md5 filename for caching
+
+   tmppath="/var/www/html"
+   castdevice = pychromecast.Chromecast(ip)
+   castdevice.wait()
+
+   vol_previous=castdevice.status.volume_level
+   #castdevice.set_volume(0.0) #set volume 0 for not hear the BEEEP
+   if not os.path.isfile(fname):
+      tts = gTTS(say,lang='en')
+      tts.save(tmppath+fname)
+   
+   mc = castdevice.media_controller
+   url="http://"+local_ip+fname
+   mc.play_media(url, "audio/mp3")
+   mc.block_until_active()
+   mc.pause() #prepare audio and pause...
+   time.sleep(0.5);
+
+   if not volume is None:
+      castdevice.set_volume(volume) 
+
+   mc.play() #play the mp3
+   castdevice.wait()
+   time.sleep(1.0)
+   
+   while not mc.status.player_is_idle:
+      time.sleep(1) 
+
+   if not volume is None:   
+      castdevice.set_volume(vol_previous) 
+
+   mc.stop()
+   
+   castdevice.quit_app()
+   return  
+#
+# main
+#
+def main(): 
+   say=sys.argv[1];
+   if len(sys.argv) > 2:
+     volume=float(sys.argv[2])
+
+   broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.17"}
+   #broadcast_addresses = {"192.168.20.97" }
+   processes = []
+
+   for address in broadcast_addresses:
+      p = Process(target = speak, args=(address, say, volume))
+      processes.append(p)
+      p.start()
+
+   for process in processes:
+      process.join()
+
+
+main()

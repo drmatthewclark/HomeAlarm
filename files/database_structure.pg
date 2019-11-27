@@ -1,0 +1,221 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6.13
+-- Dumped by pg_dump version 9.6.13
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: plsh; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plsh WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION plsh; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plsh IS 'PL/sh procedural language';
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: actions; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.actions (
+    "time" timestamp without time zone DEFAULT now(),
+    action text,
+    cause text
+);
+
+
+ALTER TABLE public.actions OWNER TO alarm;
+
+--
+-- Name: contacts; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.contacts (
+    type text,
+    contact text
+);
+
+
+ALTER TABLE public.contacts OWNER TO alarm;
+
+--
+-- Name: devices; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.devices (
+    number integer,
+    name text,
+    closed_bit integer,
+    type text,
+    loop1 text,
+    loop2 text,
+    loop3 text,
+    normal text,
+    priority integer DEFAULT 0
+);
+
+
+ALTER TABLE public.devices OWNER TO alarm;
+
+--
+-- Name: events; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.events (
+    "time" timestamp without time zone DEFAULT now(),
+    source text,
+    event text,
+    flag boolean,
+    code smallint
+);
+
+
+ALTER TABLE public.events OWNER TO alarm;
+
+--
+-- Name: lastalert; Type: VIEW; Schema: public; Owner: alarm
+--
+
+CREATE VIEW public.lastalert AS
+ SELECT events.source,
+    to_char(max(events."time"), 'dd Mon yyyy hh24:mi'::text) AS "time",
+    events.event
+   FROM public.events
+  WHERE (events.flag = true)
+  GROUP BY events.source, events.event
+  ORDER BY (max(events."time")) DESC
+ LIMIT 20;
+
+
+ALTER TABLE public.lastalert OWNER TO alarm;
+
+--
+-- Name: status; Type: VIEW; Schema: public; Owner: alarm
+--
+
+CREATE VIEW public.status AS
+ SELECT ab.source,
+    date_trunc('minutes'::text, ab."time") AS "time",
+    ab.event,
+    ab.flag,
+    ab.code
+   FROM ( SELECT DISTINCT ON (events.source) events.source,
+            events."time",
+            events.event,
+            events.flag,
+            events.code
+           FROM public.events
+          ORDER BY events.source, events."time" DESC) ab
+  ORDER BY ab."time" DESC;
+
+
+ALTER TABLE public.status OWNER TO alarm;
+
+--
+-- Name: open; Type: VIEW; Schema: public; Owner: alarm
+--
+
+CREATE VIEW public.open AS
+ SELECT status.source,
+    to_char(status."time", 'dd Mon yyyy hh24:mi'::text) AS "time",
+    status.event
+   FROM public.status
+  WHERE (NOT (status.event IN ( SELECT DISTINCT devices.normal
+           FROM public.devices)));
+
+
+ALTER TABLE public.open OWNER TO alarm;
+
+--
+-- Name: state; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.state (
+    category text,
+    enabled boolean
+);
+
+
+ALTER TABLE public.state OWNER TO alarm;
+
+--
+-- Name: devices_normal_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX devices_normal_idx ON public.devices USING btree (normal);
+
+
+--
+-- Name: events_event_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX events_event_idx ON public.events USING btree (event);
+
+
+--
+-- Name: events_flag_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX events_flag_idx ON public.events USING btree (flag);
+
+
+--
+-- Name: events_source_event_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX events_source_event_idx ON public.events USING btree (source, event);
+
+
+--
+-- Name: events_time_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX events_time_idx ON public.events USING btree ("time");
+
+
+--
+-- Name: source_index; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX source_index ON public.events USING btree (source);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

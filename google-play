@@ -1,0 +1,75 @@
+#! /usr/bin/python3.5
+# play a file
+#
+import sys
+import pychromecast
+import os
+import os.path
+import time
+import hashlib
+import socket
+import shutil
+from multiprocessing import Process
+
+def play(ip, file, volume):
+   #
+   # speak something on GoogleHome
+   #
+   
+   #********* retrieve local ip of my rpi3
+   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+   s.connect(("8.8.8.8", 80))
+   local_ip=s.getsockname()[0]
+   s.close()
+   #**********************
+   dname="/5920ddcqeag/" 
+
+   fname=dname + file
+   localpath="/home/pi/recordings/"
+   tmppath="/var/www/html"
+   castdevice = pychromecast.Chromecast(ip)
+   castdevice.wait()
+   vol_prec=castdevice.status.volume_level
+   print("current vol " + str(vol_prec))
+   
+   #castdevice.set_volume(0.0) #set volume 0 for not hear the BEEEP
+   # files are precopied
+   #shutil.copy(localpath + file, tmppath + fname)
+   
+   mc = castdevice.media_controller
+   url="http://"+local_ip+fname
+   mc.play_media(url, "audio/mp3")
+   mc.block_until_active()
+   mc.pause() #prepare audio and pause...
+   
+   time.sleep(0.5)
+   #castdevice.set_volume(volume) 
+   mc.play() 
+   time.sleep(0.5)
+   
+   while not mc.status.player_is_idle:
+      time.sleep(0.2)
+   
+   #castdevice.set_volume(vol_prec) #setting volume to precedent value
+   mc.stop()
+   
+   castdevice.quit_app()
+   return  
+#
+# main
+#
+def main(): 
+   say=sys.argv[1];
+   if len(sys.argv) > 2:
+     volume=sys.argv[2]
+   else:
+     volume = 0.1
+
+   p1 = Process(target = play, args=("192.168.20.11", say, volume))
+   p2 = Process(target = play, args=("192.168.20.97", say, volume))
+   p1.start()
+   p2.start()
+   p1.join()
+   p2.join()
+
+main()

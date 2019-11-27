@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-
-
-echo ""
-/usr/bin/psql -U alarm -c  "select lastalert.source, lastalert.time as last_event, lastalert.event, to_char(a.time, 'dd Mon yyyy hh24:mi') as heartbeat, a.event from lastalert inner join (select * from status) a on a.source = lastalert.source;"

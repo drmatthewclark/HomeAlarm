@@ -64,9 +64,10 @@ def speak(ip, say, volume):
 #
 def main(): 
    say=sys.argv[1];
+   volume = None
    if len(sys.argv) > 2:
      volume=float(sys.argv[2])
-
+   
    broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.17"}
    #broadcast_addresses = {"192.168.20.97" }
    processes = []

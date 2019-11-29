@@ -10,7 +10,7 @@ Features
 - optional list temperature sensors
 - stores all events in a database for analysis
 
-[Screenshot](./screenshot.png)
+![Screenshot](./screenshot.png)
 
 required packages
 	postgresql

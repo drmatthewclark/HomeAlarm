@@ -5,7 +5,7 @@
 import psycopg2 as psql
 import time
 from multiprocessing import Process
-import googlespeak
+import googlespeak as gs
 
 conn = psql.connect(user='sensor', host='pi')
 cur = conn.cursor()
@@ -28,6 +28,7 @@ def checkTemperature():
      temp = str(dev[1])
      warn = "temperature warning " + name + " " + temp
      print(warn)
+     gs.announce(warn)
 
 def warn():
     print("starting temperature monitor")

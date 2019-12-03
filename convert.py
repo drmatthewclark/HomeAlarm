@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python3 
 #
 # alarm system using Honeywell sensors written in Python from the
 # original awk implementation
@@ -11,6 +11,9 @@ import sys
 import json
 import subprocess
 import shlex
+import action
+from multiprocessing import Process
+import temperature_warning
 
 #
 # initialize the status bits for Honeywell sensors
@@ -34,8 +37,8 @@ def initstatus():
 
   global status
   status = dict()
-  status["bit1"]       = 1    #  ?
-  status["bit2"]       = 2    #  ?
+  status["bit1"]       = 1    #  ? not sure what this means  
+  status["bit2"]       = 2    #  ? not sure what this means
   #status["heartbeat"] = 4    # periodic signal; suppresed
   status["battery"]    = 8    # battery is low
   #status["loop3"]     = 16   # loop 3
@@ -50,7 +53,7 @@ def initstatus():
 #---------------------------------------------
 def readDevices():
    result = list()
-   sql = "select number, name, closed_bit, normal, loop1, loop2, loop3 from devices;"
+   sql = "select number, name, closed_bit, normal, loop1, loop2, loop3, type  from devices;"
    cur.execute(sql)
    for data in cur:
      result.append(data)
@@ -63,21 +66,23 @@ def readDevices():
 def process(line):
 
   global lastalert
-  guard_gap = 4.0
+  guard_gap = 3.5  # seconds
   flag = False
   parsed = json.loads(line)
-  id = parsed["id"]
-  time = parsed["time"]
-  event = parsed["event"]
+  deviceId = parsed["id"]
+  eventTime = parsed["time"]
+  eventCode = parsed["event"]
 
-  timestamp = datetime.datetime.strptime(time,"%Y-%m-%d %H:%M:%S" )
-  device = getdeviceinfo(id)
+  timestamp = datetime.datetime.strptime(eventTime,"%Y-%m-%d %H:%M:%S" )
+  device = getdeviceinfo(deviceId)
 
   if device is None:   # if device is not in list; a neighbors device
     return
 
-  name = device["name"]
-  hashkey = str(id) + 'x' + str(event)  # hash to store last signal
+  deviceName = device["name"]
+  deviceType = device["type"]
+
+  hashkey = str(deviceId) + 'x' + str(eventCode)  # hash to store last signal
 
   # ignore the multiple signals from each device; process
   # only one within the guard_gap interval
@@ -89,13 +94,12 @@ def process(line):
 
   lastalert[hashkey] = timestamp
   
-  print(name + " " +  line)
 
   # is this a heartbeat or a signal?
-  heartbeat = (4 & event) > 0  # true/false for heartbeat
+  heartbeat = (4 & eventCode) > 0  # true/false for heartbeat
 
   status_result = device["normal"]  # default status
-  device_signal = event & device["code"]
+  device_signal = eventCode & device["code"]
 
   if (device_signal > 0 ):
         if not heartbeat:
@@ -111,23 +115,23 @@ def process(line):
 
   # check other stati - battery, tamper etc.
   for val in status:
-    if (status[val] & device["code"] == 0 and (status[val] & event) > 0):
-      status_result = val + "," + status_result
+    if (status[val] & device["code"] == 0 and (status[val] & eventCode) != 0):
+      status_result = status_result + "," + val
 
   print("status: " + status_result)
 
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
-  values = (name, status_result, event, flag )
+  values = (deviceName, status_result, eventCode, flag )
   cur.execute(sql, values)
   conn.commit()
 
+  print(deviceName + " flag:" + str(flag) + " " +  line)
   # if action is warranted:
+  # TODO: call with python
+  #
   if flag:
-    cmd = "nohup /home/pi/action.sh " + str(time) + " " + str(name) + " "  + str(status_result) + " " +  str(event) + " " + str(flag) + " >/dev/null &"
-
-    print("take action " + cmd)
-    subprocess.call(cmd, shell=True)
+    startThread(action.action, (deviceName, status_result, deviceType))
 
 
 #-------------------------------------------
@@ -137,7 +141,7 @@ def process(line):
 def getdeviceinfo(id):
 	for data in deviceList:
 		if (id == data[0] ):
-        	   result = dict()
+                   result = dict()
                    result["id"]     = data[0]
                    result["name"]   = data[1]
                    result["code"]   = data[2]
@@ -145,8 +149,18 @@ def getdeviceinfo(id):
                    result["loop1"]  = data[4]
                    result["loop2"]  = data[5]
                    result["loop3"]  = data[6]
-		   return result
+                   result["type"]   = data[7]
+                   return result
 	return None
+
+
+#
+# start a function in a thread
+#
+def startThread(funcname, args):
+      print("start action thread" + str(args))
+      Process(target = funcname, args=args).start()
+
 
 #-------------------------
 # main 
@@ -168,7 +182,7 @@ def main():
 
   file = subprocess.Popen(shlex.split(cmd), bufsize=1,stdout=subprocess.PIPE, stdin=subprocess.PIPE) 
   while True:
-   line = file.stdout.readline().rstrip() 
+   line = file.stdout.readline().decode("UTF-8").rstrip()
    process(line)
 
 main()

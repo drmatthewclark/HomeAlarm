@@ -23,11 +23,10 @@ def door_alert(source):
 def fire_alert(source):
    print("*** fire alert: " + source)
    functions.trigger()
-   status["triggered"] = True
    alert = "fire alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "fire")
-   while status["triggered"] and not silentAlarm:
+   while functions.get_status()["triggered"] and not silentAlarm:
        gs.announce("FIRE " + source  + " FIRE " + source , volume)
        time.sleep(1.0)
        gs.playmp3("/5920ddcqeag/fire.mp3", volume)
@@ -41,14 +40,13 @@ def alarm_alert(source):
    print("*** alarm alert: " + source)
    print(str(status)) 
    functions.trigger()
-   status["triggered"] = True
    alert = "alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "alarm")
    gs.announce("alarm alarm alarm " + source + " violated  " , volume) 
    time.sleep(1.0)
    gs.announce("police dispatch confirmed", volume)
-   while status["triggered"] and not silentAlarm:
+   while functions.get_status()["triggered"] and not silentAlarm:
         gs.announce("alarm" + source + " violated  " , volume) 
         time.sleep(1.0)
         gs.playmp3("/5920ddcqeag/sirenhilowithrumbler.wav", volume)
@@ -60,11 +58,10 @@ def alarm_alert(source):
 def water_alert(source):
     print("*** water alert: " + source)
     functions.trigger()
-    status["triggered"] = True
     alert = "water " + source
     functions.smail(alert)
     functions.log_action(alert, "water")
-    while status["triggered"]:
+    while functions.get_status()["triggered"]:
         gs.announce("water detected " + source + " water detected", volume)
         time.sleep(1.0)
         gs.announce("water detected " + source + " water detected", volume)
@@ -79,7 +76,6 @@ def water_alert(source):
 #
 def action(name, status_result, type):
    print("action: " + name + "," + status_result + "," + type)
-   global status
    status = functions.get_status()
 
    # set silent alarm status 
@@ -111,4 +107,5 @@ def startThread(funcname, args):
 
 # test
 #action("front door", "open", "door")  
+#print(functions.get_status()["triggered"] )
  

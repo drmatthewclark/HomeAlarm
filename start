@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # run as root from /etc/rc.local
 #
@@ -9,7 +9,6 @@ PROGRAM=/home/pi/convert.py
 LOG="/dev/null"
 PPM=0
 PIDCNVRT=/tmp/pidcnvrt.txt
-source /home/pi/functions.sh
 
 if [ -e "${PIDCNVRT}" ]; then
   kill  $(<"${PIDCNVRT}")
@@ -20,6 +19,6 @@ nohup ${PROGRAM}  > ${LOG} 2>&1 &
 echo $! > "${PIDCNVRT}"
 
 # log message
-${PSQL} "insert into actions (action,cause) values ('restart listener','restart');"
+psql -U alarm -c "insert into actions (action,cause) values ('restart listener','restart');"
 
 echo "end"

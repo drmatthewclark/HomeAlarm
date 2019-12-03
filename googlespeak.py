@@ -11,8 +11,8 @@ import datetime
 # 
 # addresses of google home devices
 #
-#broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.17"}
-broadcast_addresses = {"192.168.20.97" }
+broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.17"}
+#broadcast_addresses = {"192.168.20.97" } # basement
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
 
 

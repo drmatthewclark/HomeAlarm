@@ -38,7 +38,6 @@ def fire_alert(source):
 #''' 
 def alarm_alert(source):
    print("*** alarm alert: " + source)
-   print(str(status)) 
    functions.trigger()
    alert = "alarm " + source
    functions.smail(alert)

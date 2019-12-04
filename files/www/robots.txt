@@ -1,1 +1,6 @@
-/var/www/html/robots.txt
+
+User-agent: * 
+Disallow: /
+
+User-agent: Googlebot
+Disallow: /

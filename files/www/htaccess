@@ -1,1 +1,5 @@
-/var/www/html/.htaccess
+AuthType Basic
+AuthGroupFile /dev/null
+AuthName "Restricted access"
+AuthUserFile /home/alarm/.htpasswd
+require valid-user

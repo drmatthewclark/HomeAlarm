@@ -1,4 +1,3 @@
-
 <head>
   <meta http-equiv="refresh" content="10">
   <title>Security Control</title>
@@ -22,7 +21,7 @@
 
 
   try {
-     $status = pg_exec($link, "select * from state;");
+     $status = pg_query($link, "select * from state;");
      $nstatus = pg_numrows($status);
      for( $i = 0; $i < $nstatus; $i++) {
         $r = pg_fetch_array($status, $i);
@@ -89,7 +88,7 @@
   <h1>STATUS:<h1> 
 
   <?php
-     $offline = pg_exec($link, "select source from status where time < (current_timestamp - interval '3 day');");
+     $offline = pg_query($link, "select source from status where time < (current_timestamp - interval '3 day');");
      $numoffline = pg_numrows($offline);
 
  	if ($numoffline > 0 ) {
@@ -105,7 +104,7 @@
         echo '<warn>' . $list . '</warn>';
 	}
 
-    $open_status = pg_exec($link, "select * from open;");
+    $open_status = pg_query($link, "select * from open;");
     $doors_open = pg_numrows($open_status);
 
     if ($trigger_status == 't') {
@@ -153,7 +152,7 @@
   echo "<th>Event</th>";
   echo "</tr>";
 
-     $last = pg_exec($link, "select source, time, event  from lastalert where (time::timestamp) > current_timestamp - interval '2 days';");
+     $last = pg_query($link, "select source, time, event  from lastalert where (time::timestamp) > current_timestamp - interval '2 days';");
       // Loop on rows in the result set.
       $numrows = pg_numrows($last);
       for($ri = 0; $ri < $numrows; $ri++) {
@@ -168,8 +167,8 @@
     
    echo "</table>";
 
-     $temperature = pg_exec($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
-     $ctime = pg_fetch_array(pg_exec($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
+     $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
+     $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
      echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
      echo " <table id=\"tbl\">";
      echo "  <tr>";

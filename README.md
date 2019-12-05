@@ -21,4 +21,12 @@ required packages
 	psycopg2
         pychromecast
 	gtts
-	pico2wave
+
+## Installation
+Install postgreql and tools
+create database from schema provided
+add devices
+install apache2
+use config file provided
+use a password file for the "alarm" user
+if you need external access, use your router to provide access from the external internet

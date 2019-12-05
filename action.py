@@ -76,6 +76,7 @@ def water_alert(source):
 def action(name, status_result, type):
    print("action: " + name + "," + status_result + "," + type)
    status = functions.get_status()
+   global silentAlarm
 
    # set silent alarm status 
    if status["silent-alarm"]:

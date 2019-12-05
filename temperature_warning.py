@@ -4,11 +4,11 @@
 #
 import psycopg2 as psql
 import time
+import random
 from multiprocessing import Process
 import googlespeak as gs
 
 conn = psql.connect(user='sensor', host='pi')
-cur = conn.cursor()
 
 def checkTemperature():
   LO_TEMP="38"
@@ -21,21 +21,23 @@ def checkTemperature():
             group by name, time, temperature;"
 
   vals=(LO_TEMP, HI_TEMP,)
-  cur.execute(query, vals)
 
-  for dev in cur.fetchall():
-     name = str(dev[0])
-     temp = str(dev[1])
-     warn = "temperature warning " + name + " " + temp
-     print(warn)
-     gs.announce(warn)
+  with conn.cursor() as cur:
+    cur.execute(query, vals)
+
+    for dev in cur.fetchall():
+       name = str(dev[0])
+       temp = str(dev[1])
+       warn = "temperature warning " + name + " " + temp
+       print(warn)
+       gs.announce(warn)
+
 
 def warn():
     print("starting temperature monitor")
     while True:
         checkTemperature()
-        time.sleep(60)
-
+        time.sleep(60 + random.randint(-10, 10))
 
 def check():
     Process(target = warn).start()

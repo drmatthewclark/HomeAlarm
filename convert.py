@@ -52,13 +52,18 @@ def initstatus():
 #  return a list of devices with info
 #---------------------------------------------
 def readDevices():
-   result = list()
-   sql = "select number, name, closed_bit, normal, loop1, loop2, loop3, type  from devices;"
-   cur.execute(sql)
-   for data in cur:
-     result.append(data)
-   
-   return result;
+
+  result = list()
+  sql = "select number, name, closed_bit, normal, loop1, loop2, loop3, type  from devices;"
+
+  conn = psycopg2.connect(user='alarm')
+  with conn.cursor() as cur:
+       cur.execute(sql)
+       for data in cur:
+         result.append(data)
+  
+  conn.close()
+  return result
 
 #----------------------------------------------
 # process a line of JSON code from the radio
@@ -68,7 +73,13 @@ def process(line):
   global lastalert
   guard_gap = 3.5  # seconds
   flag = False
-  parsed = json.loads(line)
+
+  try:
+    parsed = json.loads(line)
+  except:
+    print("eror json parsing: " + line)
+    return
+
   deviceId = parsed["id"]
   eventTime = parsed["time"]
   eventCode = parsed["event"]
@@ -123,8 +134,12 @@ def process(line):
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
   values = (deviceName, status_result, eventCode, flag )
-  cur.execute(sql, values)
+
+  conn = psycopg2.connect(user='alarm')
+  with conn.cursor() as cur:
+    cur.execute(sql, values)
   conn.commit()
+  conn.close()
 
   print(deviceName + " flag:" + str(flag) + " " +  line)
   # if action is warranted:
@@ -167,12 +182,10 @@ def startThread(funcname, args):
 #-------------------------
 def main():
 
-  global deviceList, conn, cur, status, lastalert
+  global deviceList, status, lastalert
   lastalert = dict()
 
   # connect to database
-  conn = psycopg2.connect('user=alarm')
-  cur = conn.cursor()
   deviceList  = readDevices()
   initstatus()
    

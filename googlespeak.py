@@ -11,10 +11,11 @@ import datetime
 # 
 # addresses of google home devices
 #
-broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.17"}
+broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
 #broadcast_addresses = {"192.168.20.97" } # basement
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
-
+useGoogleHome = True
+usePiSpeaker  = True
 
 #-----------------------------------------
 # create the mp3 file for the text to say
@@ -78,6 +79,9 @@ def main(say, volume):
 #--------------------------------
 def playmp3(soundfile, volume):
 
+   if not soundfile.startswith(mp3dir):
+       soundfile = mp3dir + soundfile
+
    systemvol = ""
    if not volume is None:
      if (float(volume) > 1):        # convert 0-100 to 0-1
@@ -85,19 +89,21 @@ def playmp3(soundfile, volume):
      systemvol= " --gain " + str(round(float(volume), 2))
 
    # play over pi speaker 
-   #os.system('/usr/bin/mpg321 ' + systemvol +  " /var/www/html" + soundfile  + ' &')
+   if usePiSpeaker:
+     os.system('/usr/bin/mpg321 ' + systemvol +  " /var/www/html" + soundfile  + ' &')
 
-   processes = []
+   if useGoogleHome:
+     processes = []
 
-   for address in broadcast_addresses:
-      p = Process(target = speak, args=(address, soundfile, volume))
-      processes.append(p)
-      p.start()
+     for address in broadcast_addresses:
+        p = Process(target = speak, args=(address, soundfile, volume))
+        processes.append(p)
+        p.start()
 
-   for process in processes:
-      process.join()
+     for process in processes:
+        process.join()
 
-   time.sleep(1.0)
+     time.sleep(1.0)
 
 #------------------------
 # announce the text

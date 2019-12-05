@@ -5,7 +5,7 @@ import time
 from multiprocessing import Process
 
 
-volume=10  # normally 100, set lower for testing
+volume=100  # normally 100, set lower for testing
 silentAlarm = False
 
 
@@ -29,7 +29,7 @@ def fire_alert(source):
    while functions.get_status()["triggered"] and not silentAlarm:
        gs.announce("FIRE " + source  + " FIRE " + source , volume)
        time.sleep(1.0)
-       gs.playmp3("/5920ddcqeag/fire.mp3", volume)
+       gs.playmp3("fire.mp3", volume)
        time.sleep(1.0)
 
 
@@ -48,7 +48,7 @@ def alarm_alert(source):
    while functions.get_status()["triggered"] and not silentAlarm:
         gs.announce("alarm" + source + " violated  " , volume) 
         time.sleep(1.0)
-        gs.playmp3("/5920ddcqeag/sirenhilowithrumbler.wav", volume)
+        gs.playmp3("sirenhilowithrumbler.wav", volume)
         time.sleep(0.5)
 
 #

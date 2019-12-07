@@ -164,7 +164,9 @@
         </tr>
         ";
       }
-    
+
+   pg_close($link);
+
    echo "</table>";
 
      $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
@@ -184,7 +186,7 @@
         echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
       }
      echo "</table>";
-
+     pg_close($tlink);
      echo time()-$start;
   ?>
  

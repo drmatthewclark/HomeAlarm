@@ -93,7 +93,6 @@
 
  	if ($numoffline > 0 ) {
         $list = "";
-	echo '<h1>Devices Offline:</h1>';
 
 	for ($i = 0; $i < $numoffline; $i++) {
 		$val = pg_fetch_row($offline)[0];
@@ -101,7 +100,7 @@
 	}
 
         $list = substr($list, 0, strlen($list) - 2 );
-        echo '<warn>' . $list . '</warn>';
+        echo '<warn>OFFLINE: ' . $list . '</warn><br>';
 	}
 
     $open_status = pg_query($link, "select * from open;");

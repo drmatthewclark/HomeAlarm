@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/python3 
 #
 # alarm system using Honeywell sensors written in Python from the
 # original awk implementation

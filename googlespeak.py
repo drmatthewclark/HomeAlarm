@@ -1,4 +1,4 @@
-#! /usr/bin/python3.5
+#!/usr/bin/python3
 import sys
 import pychromecast
 import os
@@ -56,10 +56,12 @@ def speak(ip, fname, volume):
 
    mc.play() #play the mp3
    castdevice.wait()
-   time.sleep(1.0)
-   
+   # this is required
+   time.sleep(0.6)
+  
+   # wait for it to be done
    while not mc.status.player_is_idle:
-      time.sleep(1) 
+      castdevice.wait()
 
    if not volume is None:   
       castdevice.set_volume(vol_previous) 

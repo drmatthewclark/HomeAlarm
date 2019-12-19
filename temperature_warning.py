@@ -7,8 +7,7 @@ import time
 import random
 from multiprocessing import Process
 import googlespeak as gs
-
-conn = psql.connect(user='sensor', host='pi')
+import functions
 
 def checkTemperature():
   LO_TEMP="38"
@@ -22,6 +21,7 @@ def checkTemperature():
 
   vals=(LO_TEMP, HI_TEMP,)
 
+  conn = psql.connect(user='sensor', host='pi')
   with conn.cursor() as cur:
     cur.execute(query, vals)
 
@@ -30,8 +30,10 @@ def checkTemperature():
        temp = str(dev[1])
        warn = "temperature warning " + name + " " + temp
        print(warn)
+       functions.smail(warn)
        gs.announce(warn)
 
+  conn.close()
 
 def warn():
     print("starting temperature monitor")

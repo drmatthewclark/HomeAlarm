@@ -13,7 +13,7 @@ import subprocess
 import shlex
 import action
 from multiprocessing import Process
-import temperature_warning
+import temperature_warning as temp_warn
 
 #
 # initialize the status bits for Honeywell sensors
@@ -173,7 +173,12 @@ def getdeviceinfo(id):
 # start a function in a thread
 #
 def startThread(funcname, args):
-      print("start action thread" + str(args))
+      if args is None:
+          arg = ""
+      else:
+          arg = str(args) 
+
+      print("start action thread " + funcname.__name__ + " " + arg)
       Process(target = funcname, args=args).start()
 
 
@@ -181,6 +186,8 @@ def startThread(funcname, args):
 # main 
 #-------------------------
 def main():
+  # start temperature monitor
+  temp_warn.check()
 
   global deviceList, status, lastalert
   lastalert = dict()

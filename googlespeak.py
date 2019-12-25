@@ -49,7 +49,7 @@ def speak(ip, fname, volume):
    mc.play_media(url, "audio/mp3")
    mc.block_until_active()
    mc.pause() #prepare audio and pause...
-   time.sleep(0.5);
+   time.sleep(1.0);
 
    if not volume is None:
       castdevice.set_volume(volume) 
@@ -57,11 +57,12 @@ def speak(ip, fname, volume):
    mc.play() #play the mp3
    castdevice.wait()
    # this is required
-   time.sleep(0.6)
+   time.sleep(1.0)
   
    # wait for it to be done
    while not mc.status.player_is_idle:
       castdevice.wait()
+      time.sleep(0.5)
 
    if not volume is None:   
       castdevice.set_volume(vol_previous) 

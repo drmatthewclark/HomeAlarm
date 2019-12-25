@@ -9,29 +9,33 @@ from multiprocessing import Process
 import googlespeak as gs
 import functions
 
+volume = 80
+
 def checkTemperature():
   LO_TEMP="38"
   HI_TEMP="115"
+  LIVING_TEMP="59"
 
   query="select distinct on(name) name, round(temperature::numeric, 0) \
             from data where time = (select max(time) from temperature)\
             and (name != 'outside' and name not like 'hvac%%') \
             and (temperature < %s or temperature > %s)\
+            or (name = 'familyroom1' and temperature < %s )\
             group by name, time, temperature;"
 
-  vals=(LO_TEMP, HI_TEMP,)
+  vals=(LO_TEMP, HI_TEMP, LIVING_TEMP)
 
   conn = psql.connect(user='sensor', host='pi')
   with conn.cursor() as cur:
     cur.execute(query, vals)
 
     for dev in cur.fetchall():
-       name = str(dev[0])
+       name = str(dev[0]).replace("1","")
        temp = str(dev[1])
-       warn = "temperature warning " + name + " " + temp
+       warn = "temperature warning " + name + " " + temp + " degrees "
        print(warn)
        functions.smail(warn)
-       gs.announce(warn)
+       gs.announce(warn, volume)
 
   conn.close()
 
@@ -46,4 +50,3 @@ def check():
 
 
 
-check()

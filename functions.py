@@ -24,7 +24,7 @@ def get_status():
 #--------------------------------
 def smail(text):
    conn = psql.connect(user='alarm')
-    with conn.cursor() as cur:
+   with conn.cursor() as cur:
       cur.execute("select contact from contacts;")
       for contact in cur.fetchall():
         email = contact[0]

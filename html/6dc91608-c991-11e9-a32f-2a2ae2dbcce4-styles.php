@@ -44,11 +44,11 @@ label {
 }
 
 .button {
-  background-color: #FC0000; 
+  background-color: #010CFC; 
   border: none;
   color: white;
   width: 120px;
-  padding: 16px 32px;
+  padding: 12px 32px;
   text-align: center;
   text-decoration: none;
   display: inline-block;

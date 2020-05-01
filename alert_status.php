@@ -1,1 +1,0 @@
-/var/www/html/alert_status.php

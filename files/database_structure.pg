@@ -129,19 +129,16 @@ ALTER TABLE public.lastalert OWNER TO alarm;
 --
 
 CREATE VIEW public.status AS
- SELECT ab.source,
-    date_trunc('minutes'::text, ab."time") AS "time",
-    ab.event,
-    ab.flag,
-    ab.code
-   FROM ( SELECT DISTINCT ON (events.source) events.source,
-            events."time",
-            events.event,
-            events.flag,
-            events.code
+ SELECT a.source,
+    date_trunc('minutes'::text, a."time") AS "time",
+    a.event,
+    a.flag,
+    a.code
+   FROM (public.events a
+     JOIN ( SELECT events.source,
+            max(events."time") AS maxtime
            FROM public.events
-          ORDER BY events.source, events."time" DESC) ab
-  ORDER BY ab."time" DESC;
+          GROUP BY events.source) b ON (((a.source = b.source) AND (a."time" = b.maxtime))));
 
 
 ALTER TABLE public.status OWNER TO alarm;
@@ -199,6 +196,13 @@ CREATE INDEX events_flag_idx ON public.events USING btree (flag);
 --
 
 CREATE INDEX events_source_event_idx ON public.events USING btree (source, event);
+
+
+--
+-- Name: events_source_time_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX events_source_time_idx ON public.events USING btree (source, "time");
 
 
 --

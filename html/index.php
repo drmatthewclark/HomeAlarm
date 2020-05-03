@@ -55,10 +55,14 @@
   <h0>
     Security Control
   </h0>
-  <input type="button" class="button" name='reset' value='reset'>
-  <br><br>
-  <?php echo date("d M Y h:i a");  ?> 
-  <br><br><br>
+  <?php
+  if ($trigger_status == 't') {
+	  echo "<input type='button' class='button' name='reset' value='reset alarm'>";
+  };
+  echo "<br><br>";
+  echo date("d M Y h:i a");   
+  echo "<br><br><br>";
+  ?>
 
   <label class="switch" name="door">
      <input type='checkbox' name='door_alert' value='false'  <?php echo $da_status == 't' ? 'checked' : '';?> >

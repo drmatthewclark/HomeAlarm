@@ -1,12 +1,31 @@
 #!/usr/bin/python3
+"""
+This file is part of HomeAlarm.
+
+HomeAlarm is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+HomeAlarm is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+
+Copyright Matthew Clark 2020
+
+"""
 import sys
 import pychromecast
 import os
 import os.path
-from gtts import gTTS
+from   gtts import gTTS
 import time
 import hashlib
-from multiprocessing import Process
+from   multiprocessing import Process
 import datetime
 # 
 # addresses of google home devices

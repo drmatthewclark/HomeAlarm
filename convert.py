@@ -4,6 +4,27 @@
 # original awk implementation
 # Matthew Clark 25 Nov 2019
 #
+
+
+"""
+This file is part of HomeAlarm.
+
+HomeAlarm is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+HomeAlarm is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+
+Copyright Matthew Clark 2020
+
+"""
 import datetime
 import os
 import psycopg2
@@ -133,17 +154,17 @@ def process(line):
 
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
-  values = (deviceName, status_result, eventCode, flag )
+  values = (deviceName, status_result, eventCode, flag)
 
   conn = psycopg2.connect(user='alarm')
   with conn.cursor() as cur:
     cur.execute(sql, values)
+
   conn.commit()
   conn.close()
 
   print(deviceName + " flag:" + str(flag) + " " +  line)
   # if action is warranted:
-  # TODO: call with python
   #
   if flag:
     startThread(action.action, (deviceName, status_result, deviceType))

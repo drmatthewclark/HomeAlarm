@@ -1,0 +1,39 @@
+Database Tables
+
+tables
+actions - stores any actions taken
+contacts - stores people to contact if something went wrong
+devices - stores the Honeywell devices
+events - events reported by the devices
+state - current state of system, alarm settings, triggers
+
+views
+
+lastalert  - view for last alert from each device
+open - view with list of currently open doors/windows
+status - view with current state of each device
+
+
+actions fieldstime - event time
+action - event, e.g. alarm sounded
+cause - origin of event
+
+contacts
+type - email, text etc
+contact - email 
+
+devices
+
+devices have the concept of "loops" which are different alarm circuits. for example a door sensor often has two loops. one for the magnetic sensor, and one for external wires that can be connected.  The water sensor has three loops - one for water, one for low temerature, oone for high tempaerature.
+
+number - device ID from the device itself.  this is usually on a sticker on the outside and inside of the device.
+name - friendly nae for the device, like "front door"
+closed_bit - number corresponding to which bit changes on open/close. Mosty 128 or 32 for door/window sensors.
+
+type  - text e.g., window, door, describing class of device
+loop1 - text displayed for loop1 open
+loop2 - text displayed for loop2 open
+loop3 - text displayed for loop3 open
+normal - text for normal state, e.g. "closed"
+priority - not yet used
+

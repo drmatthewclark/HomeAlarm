@@ -14,15 +14,32 @@ open - view with list of currently open doors/windows
 status - view with current state of each device
 
 
-actions fieldstime - event time
+--- actions 
+time - event time
 action - event, e.g. alarm sounded
 cause - origin of event
 
-contacts
+--- contacts
+
 type - email, text etc
 contact - email 
 
-devices
+example:
+
+  type  |        contact         
+--------+------------------------
+ email  | moie@gmail.com
+ email  | larry@yahoo.com
+ text   | 2155551212@txt.att.net
+ google | 192.168.0.11
+ google | 192.168.0.97
+ google | 192.168.0.18
+ google | 192.168.0.20
+
+
+
+
+--- devices
 
 devices have the concept of "loops" which are different alarm circuits. for example a door sensor often has two loops. one for the magnetic sensor, and one for external wires that can be connected.  The water sensor has three loops - one for water, one for low temerature, oone for high tempaerature.
 
@@ -36,4 +53,47 @@ loop2 - text displayed for loop2 open
 loop3 - text displayed for loop3 open
 normal - text for normal state, e.g. "closed"
 priority - not yet used
+
+example:
+
+ number |      name       | closed_bit |  type  | loop1 | loop2 | loop3 | normal | priority 
+--------+-----------------+------------+--------+-------+-------+-------+--------+----------
+ 500909 | basement_window |        128 | window | open  |       |       | closed |        0
+            
+
+
+
+--- events
+
+logs all events from the wireless devices
+
+time - timestamp for event
+source - name of device reporting the event
+event - the event, open, close, heartbeat
+flag - flag for reportable vs heartbeat
+code - integer code reported by device
+
+
+example
+
+            time            |     source     | event  | flag | code 
+----------------------------+----------------+--------+------+------
+ 2019-08-13 14:03:07.662072 | addison_door   | closed | f    |  132
+ 2019-08-13 21:50:35.707439 | motion_waverly | still  | f    |    4
+
+
+--- state
+
+state of events.  this is a fixed table and these entries are
+assumed in the code.
+
+   category   | enabled 
+--------------+---------
+ alarm-away   | f
+ alarm-stay   | f
+ door alert   | f
+ motion alert | f
+ triggered    | f
+ silent-alarm | f
+(6 rows)
 

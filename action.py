@@ -21,7 +21,7 @@ import googlespeak as gs
 import functions 
 import time
 from multiprocessing import Process
-
+import customaction
 
 volume=90  # normally 100, set lower for testing
 silentAlarm = False
@@ -93,6 +93,7 @@ def water_alert(source):
 #
 def action(name, status_result, type):
    print("action: " + name + "," + status_result + "," + type)
+   customaction.action(name, status_result, type)
    status = functions.get_status()
    global silentAlarm
 
@@ -104,11 +105,14 @@ def action(name, status_result, type):
 
 #
 # mutually exclusive alarms; only one will be activated
-#
+# fire and water alarms always sound independent of other
+# settings
+
    if   type == "fire":                    # fire alaerm
       fire_alert(name)
    elif type == "water":                   # water alarm
       water_alert(name)
+
    elif status["alarm-stay"] and type in ("door", "window"):  # perimeter
       alarm_alert(name)
    elif status["alarm-away"]:  # all devices will set off alarm

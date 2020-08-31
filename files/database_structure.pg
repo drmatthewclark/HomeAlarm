@@ -67,7 +67,9 @@ ALTER TABLE public.actions OWNER TO alarm;
 
 CREATE TABLE public.contacts (
     type text,
-    contact text
+    contact text,
+    note text,
+    zone text
 );
 
 

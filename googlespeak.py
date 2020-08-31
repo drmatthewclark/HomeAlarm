@@ -39,13 +39,14 @@ mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
 useGoogleHome = True
 usePiSpeaker  = True
 
-local_ip  = None
+local_ip = None
 
 def getMyIP():
     testIP = "8.8.8.8"
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect((testIP, 0))
     ipaddr = s.getsockname()[0]
+    return ipaddr
 
 #-----------------------------------------
 # create the mp3 file for the text to say
@@ -66,6 +67,7 @@ def makefile(say):
 # say the words on google home
 #-------------------------------------
 def speak(ip, fname, volume):
+
    global local_ip
    if local_ip is None:
       local_ip = getMyIP()

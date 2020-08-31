@@ -3,7 +3,7 @@
   <title>Security Control</title>
 </head>
 
-<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="./jquery-1.10.2.js"></script>
 <?php include "6dc91608-c991-11e9-a32f-2a2ae2dbcce4-styles.php"  ?>
 
 <?php
@@ -55,9 +55,14 @@
   <h0>
     Security Control
   </h0>
-  <br><br>
-  <?php echo date("d M Y h:i a");  ?> 
-  <br><br><br>
+  <?php
+  if ($trigger_status == 't') {
+	  echo "<input type='button' class='button' name='reset' value='reset alarm'>";
+  };
+  echo "<br><br>";
+  echo date("d M Y h:i a");   
+  echo "<br><br><br>";
+  ?>
 
   <label class="switch" name="door">
      <input type='checkbox' name='door_alert' value='false'  <?php echo $da_status == 't' ? 'checked' : '';?> >
@@ -65,23 +70,24 @@
   </label>
   <label for="door_alert" class="chkbox">door alert</label>
 
-  <label class="switch name="alarm">
+  <label class="switch" name="alarm">
      <input type='checkbox' name='away_alarm_alert' value='false' <?php echo $alarm_status == 't' ? 'checked' : '';?> >
      <span class="slider"></span>
   </label>
   <label for="away_alarm_alert" class="chkbox">away alarm</label>
 
-  <label class="switch name="alarm">
+  <label class="switch" name="alarm">
      <input type='checkbox' name='home_alarm_alert' value='false' <?php echo $home_alarm_status == 't' ? 'checked' : '';?> >
      <span class="slider"></span>
   </label>
   <label for="home_alarm_alert" class="chkbox">at-home alarm</label>
 
-  <label class="switch name="alarm">
+  <label class="switch" name="alarm">
      <input type='checkbox' name='silent_alarm' value='false' <?php echo $silent_alarm_status == 't' ? 'checked' : '';?> >
      <span class="slider"></span>
   </label>
   <label for="silent_alarm" class="chkbox">silent</label>
+
  <br>
   <head>
   <br><br>
@@ -115,7 +121,7 @@
     }
       echo $status;
 
-      echo "<br>";
+     echo "<br>";
 
   if ($doors_open > 0) {
   $result = $open_status;
@@ -143,7 +149,6 @@
    }
 
   echo "<br><h1>Last Event</h1><br>";
-
   echo " <table id=\"tbl\">";
   echo "<tr>";
   echo "<th>Source</th>";
@@ -151,7 +156,7 @@
   echo "<th>Event</th>";
   echo "</tr>";
 
-     $last = pg_query($link, "select source, time, event  from lastalert where (time::timestamp) > current_timestamp - interval '2 days';");
+     $last = pg_query($link, "select source, time, event from lastalert where (time::timestamp) > current_timestamp - interval '2 days';");
       // Loop on rows in the result set.
       $numrows = pg_numrows($last);
       for($ri = 0; $ri < $numrows; $ri++) {
@@ -164,10 +169,10 @@
         ";
       }
 
-   pg_close($link);
+     pg_close($link);
 
-   echo "</table>";
-
+     echo "</table>";
+     /**/
      $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
      $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
      echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
@@ -185,16 +190,19 @@
         echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
       }
      echo "</table>";
-     pg_close($tlink);
+      pg_close($tlink);
+ /**/
      echo time()-$start;
   ?>
- 
  </table>
-
 </br> 
 
 <script>
-	$("input[name='door_alert']").change(function(){
+        $("input[name='reset']").click(function() {
+           $.post('reset.php'); 
+	});
+
+        $("input[name='door_alert']").change(function(){
 	if($(this).is(':checked')) {
 		$true_false = true;
 	} else {

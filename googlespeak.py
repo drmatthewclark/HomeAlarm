@@ -28,17 +28,18 @@ import hashlib
 from   multiprocessing import Process
 import datetime
 import socket
+import functions
 
 # 
 # addresses of google home devices
-# TODO: put in database
-broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
+#broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
 #broadcast_addresses = {"192.168.20.97" } # basement
+
+broadcast_addresses = functions.getGoogleHome()
 
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
 useGoogleHome = True
 usePiSpeaker  = True
-
 local_ip = None
 
 def getMyIP():

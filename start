@@ -11,7 +11,7 @@ PPM=0
 PIDCNVRT=/tmp/pidcnvrt.txt
 
 if [ -e "${PIDCNVRT}" ]; then
-  kill  $(<"${PIDCNVRT}")
+  kill -SIGTERM  $(<"${PIDCNVRT}")
 fi
 killall rtl_433
 

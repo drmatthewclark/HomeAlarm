@@ -27,14 +27,25 @@ import time
 import hashlib
 from   multiprocessing import Process
 import datetime
+import socket
+
 # 
 # addresses of google home devices
-#
+# TODO: put in database
 broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
 #broadcast_addresses = {"192.168.20.97" } # basement
+
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
 useGoogleHome = True
 usePiSpeaker  = True
+
+local_ip  = None
+
+def getMyIP():
+    testIP = "8.8.8.8"
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect((testIP, 0))
+    ipaddr = s.getsockname()[0]
 
 #-----------------------------------------
 # create the mp3 file for the text to say
@@ -55,8 +66,9 @@ def makefile(say):
 # say the words on google home
 #-------------------------------------
 def speak(ip, fname, volume):
-   
-   local_ip="192.168.20.26"
+   global local_ip
+   if local_ip is None:
+      local_ip = getMyIP()
 
    castdevice = pychromecast.Chromecast(ip)
    castdevice.wait()

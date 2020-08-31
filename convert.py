@@ -155,8 +155,8 @@ def process(line):
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
   values = (deviceName, status_result, eventCode, flag)
-
   conn = psycopg2.connect(user='alarm')
+
   with conn.cursor() as cur:
     cur.execute(sql, values)
 

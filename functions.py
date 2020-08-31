@@ -37,6 +37,19 @@ def get_status():
    conn.close()
    return status
 
+#-------------------------------
+# get broadcast addresses for google home devices
+#-------------------------------
+def getGoogleHome():
+   conn = psql.connect(user='alarm')
+   result = []
+   with conn.cursor() as cur:
+      cur.execute("select contact from contacts where type = 'google';")
+      for r in cur.fetchall():
+        result.append(r[0])
+   conn.close()
+   return result
+
 
 #--------------------------------
 # send mail/text notifications
@@ -44,7 +57,7 @@ def get_status():
 def smail(text):
    conn = psql.connect(user='alarm')
    with conn.cursor() as cur:
-      cur.execute("select contact from contacts where type = 'email';")
+      cur.execute("select contact from contacts where type = 'email' or type = 'text';")
       for contact in cur.fetchall():
         email = contact[0]
         cmd="echo " + text + '| mail -s "ALARM: "' + text + " " + email

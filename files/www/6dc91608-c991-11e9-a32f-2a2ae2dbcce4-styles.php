@@ -43,6 +43,26 @@ label {
   display: inline-block;
 }
 
+.button {
+  background-color: #F10005; 
+  border: none;
+  color: white;
+  width: 240px;
+  padding: 18px 48px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  vertical-align: middle;
+  border-radius: 128px;
+  transition-duration: 0.2s;
+  margin-left: 64px;
+}
+
+.button:hover {
+  background-color: #40A000; /* Green */
+  color: white;
+}
 
 .switch {
   position: relative;

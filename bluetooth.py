@@ -1,15 +1,16 @@
-#!/usr/bin/python3
 
 import paho.mqtt.client as mqtt
 import time
 import os
 import psycopg2
 import sys
+from multiprocessing import Process
 
 # topic with status
 topic = 'home'
 user = 'alarm'
 host_name = 'alarm'
+process = None
 
 def on_message(client, userdata, message):
     msg =  str(message.payload.decode("utf-8")).split(",")
@@ -58,5 +59,13 @@ def main():
              
     client.loop_stop()
 
+# start process in thread
+def start():
+    global process
+    process = Process(target=main,name='bluetooth')
+    process.start()
 
-main()
+def stop():
+    print("stopping bluetooth process")
+    process.terminate()
+

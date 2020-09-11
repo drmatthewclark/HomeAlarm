@@ -55,6 +55,7 @@
   <h0>
     Security Control
   </h0>
+
   <?php
   if ($trigger_status == 't') {
 	  echo "<input type='button' class='button' name='reset' value='reset alarm'>";
@@ -169,8 +170,9 @@
         ";
       }
 
-     echo "</table>";  // end of events table
+      echo "</table>";  // end of events table
 
+     // temperature table
      $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where time  = (select max(time) from temperature) order by name;");
      $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
      echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
@@ -189,8 +191,8 @@
       }
      pg_close($tlink);
      echo "</table>";
-
      echo "<br>";
+
      // table for who is home and away
      echo "<br><h1>Home-Away</h1><br>";
      echo " <table id=\"tbl\">";

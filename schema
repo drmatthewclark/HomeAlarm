@@ -62,12 +62,28 @@ CREATE TABLE public.actions (
 ALTER TABLE public.actions OWNER TO alarm;
 
 --
+-- Name: bluetooth; Type: TABLE; Schema: public; Owner: alarm
+--
+
+CREATE TABLE public.bluetooth (
+    "time" timestamp without time zone,
+    person text,
+    home boolean,
+    location text
+);
+
+
+ALTER TABLE public.bluetooth OWNER TO alarm;
+
+--
 -- Name: contacts; Type: TABLE; Schema: public; Owner: alarm
 --
 
 CREATE TABLE public.contacts (
     type text,
-    contact text
+    contact text,
+    note text,
+    zone text
 );
 
 
@@ -169,6 +185,27 @@ CREATE TABLE public.state (
 
 
 ALTER TABLE public.state OWNER TO alarm;
+
+--
+-- Name: bluetooth_home_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX bluetooth_home_idx ON public.bluetooth USING btree (home);
+
+
+--
+-- Name: bluetooth_person_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX bluetooth_person_idx ON public.bluetooth USING btree (person);
+
+
+--
+-- Name: bluetooth_time_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX bluetooth_time_idx ON public.bluetooth USING btree ("time");
+
 
 --
 -- Name: devices_normal_idx; Type: INDEX; Schema: public; Owner: alarm

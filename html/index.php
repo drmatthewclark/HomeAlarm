@@ -169,11 +169,9 @@
         ";
       }
 
-     pg_close($link);
+     echo "</table>";  // end of events table
 
-     echo "</table>";
-     /**/
-     $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
+     $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where time  = (select max(time) from temperature) order by name;");
      $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
      echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
      echo " <table id=\"tbl\">";
@@ -189,13 +187,37 @@
         $row = pg_fetch_array($temperature, $ri, PGSQL_ASSOC);
         echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
       }
+     pg_close($tlink);
      echo "</table>";
-      pg_close($tlink);
- /**/
+
+     echo "<br>";
+     // table for who is home and away
+     echo "<br><h1>Home-Away</h1><br>";
+     echo " <table id=\"tbl\">";
+     echo "<tr>";
+     echo "<th>Time</th>";
+     echo "<th>Person</th>";
+     echo "<th>House</th>";
+     echo "<th>Is Home</th>";
+     echo "</tr>";
+     $home = pg_query($link, "select to_char(b.time, 'dd Mon yyyy hh24:mi'::text) AS time, b.person, b.location, b.home from bluetooth b, (select max(time) as time, person from bluetooth group by person) a where a.time = b.time;");
+     $numrows = pg_numrows($home);
+  
+      for($ri = 0; $ri < $numrows; $ri++) {
+         echo "<tr>\n";
+        $row = pg_fetch_array($home, $ri, PGSQL_ASSOC);
+        echo " <td>", $row["time"], "</td>
+        <td>", $row["person"], "</td>
+        <td>", $row["location"], "</td>
+        <td>", $row["home"], "</td>
+        </tr>
+        ";
+	}
+     echo "</table>";
      echo time()-$start;
+     pg_close($link);
   ?>
- </table>
-</br> 
+
 
 <script>
         $("input[name='reset']").click(function() {

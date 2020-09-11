@@ -27,6 +27,7 @@ Copyright Matthew Clark 2020
 """
 import datetime
 import os
+import signal
 import psycopg2
 import sys
 import json
@@ -35,7 +36,9 @@ import shlex
 import action
 from multiprocessing import Process
 import temperature_warning as temp_warn
+import bluetooth as blue
 
+radioprocess = None
 #
 # initialize the status bits for Honeywell sensors
 #
@@ -203,14 +206,24 @@ def startThread(funcname, args):
       Process(target = funcname, args=args).start()
 
 
+def killsignal(signalNumber, frame):
+    os.killpg(os.getpgid(radioprocess.pid),signal.SIGTERM)
+    temp_warn.stop()
+    blue.stop()
+    print("handling SIGTERM")
+
+
 #-------------------------
 # main 
 #-------------------------
 def main():
-  # start temperature monitor
-  temp_warn.check()
+  signal.signal(signal.SIGTERM, killsignal)
 
-  global deviceList, status, lastalert
+  # start temperature monitor
+  temp_warn.start()
+  blue.start()
+
+  global deviceList, status, lastalert, radioprocess
   lastalert = dict()
 
   # connect to database
@@ -221,9 +234,9 @@ def main():
   #
   cmd="rtl_433 -p 0 -f 345000000 -s 1M -R 70 -F json"
 
-  file = subprocess.Popen(shlex.split(cmd), bufsize=1,stdout=subprocess.PIPE, stdin=subprocess.PIPE) 
-  while True:
-   line = file.stdout.readline().decode("UTF-8").rstrip()
+  radioprocess = subprocess.Popen(shlex.split(cmd), bufsize=1,stdout=subprocess.PIPE, stdin=subprocess.PIPE) 
+  while radioprocess.poll() == None:
+   line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
    process(line)
 
 main()

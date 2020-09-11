@@ -172,10 +172,10 @@
 
       echo "</table>";  // end of events table
 
-     // temperature table
-     $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where time  = (select max(time) from temperature) order by name;");
-     $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
-     echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
+      // temperature table
+     $tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 300) a order by name";
+     $temperature = pg_query($tlink, $tquery);
+     echo "<br><h1>Temperatures</h1><br>";
      echo " <table id=\"tbl\">";
      echo "  <tr>";
      echo "   <th>Name</th>";
@@ -202,7 +202,8 @@
      echo "<th>House</th>";
      echo "<th>Is Home</th>";
      echo "</tr>";
-     $home = pg_query($link, "select to_char(b.time, 'dd Mon yyyy hh24:mi'::text) AS time, b.person, b.location, b.home from bluetooth b, (select max(time) as time, person from bluetooth group by person) a where a.time = b.time;");
+     $pq = "select distinct on (person,location) to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location, home from bluetooth  order by person, location, time desc;";
+     $home = pg_query($link, $pq);
      $numrows = pg_numrows($home);
   
       for($ri = 0; $ri < $numrows; $ri++) {

@@ -194,15 +194,14 @@
      echo "<br>";
 
      // table for who is home and away
-     echo "<br><h1>Home-Away</h1><br>";
+     echo "<br><h1>Home</h1><br>";
      echo " <table id=\"tbl\">";
      echo "<tr>";
      echo "<th>Time</th>";
      echo "<th>Person</th>";
      echo "<th>House</th>";
-     echo "<th>Is Home</th>";
      echo "</tr>";
-     $pq = "select distinct on (person,location) to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location, home from bluetooth  order by person, location, time desc;";
+     $pq = "select time, person, location from (select distinct on (person,location) to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location, home from bluetooth order by person, location, time desc) a where home= true;";
      $home = pg_query($link, $pq);
      $numrows = pg_numrows($home);
   
@@ -212,7 +211,6 @@
         echo " <td>", $row["time"], "</td>
         <td>", $row["person"], "</td>
         <td>", $row["location"], "</td>
-        <td>", $row["home"], "</td>
         </tr>
         ";
 	}

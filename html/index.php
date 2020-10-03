@@ -173,7 +173,7 @@
       echo "</table>";  // end of events table
 
       // temperature table
-     $tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 300) a order by name";
+     $tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 100) a order by name";
      $temperature = pg_query($tlink, $tquery);
      echo "<br><h1>Temperatures</h1><br>";
      echo " <table id=\"tbl\">";
@@ -201,7 +201,7 @@
      echo "<th>Person</th>";
      echo "<th>House</th>";
      echo "</tr>";
-     $pq = "select time, person, location from (select distinct on (person,location) to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location, home from bluetooth order by person, location, time desc) a where home= true;";
+     $pq = "select to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home=true;";
      $home = pg_query($link, $pq);
      $numrows = pg_numrows($home);
   

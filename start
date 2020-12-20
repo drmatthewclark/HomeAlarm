@@ -5,12 +5,13 @@
 PROGRAM=/home/pi/convert.py
 #
 # set to a file to debug what is happening
-#LOG="/tmp/alarm.log"
-LOG="/dev/null"
+LOG="/tmp/alarm.log"
+#LOG="/dev/null"
 PIDCNVRT=/tmp/pidcnvrt.txt
 
 if [ -e "${PIDCNVRT}" ]; then
   kill -SIGTERM  $(<"${PIDCNVRT}")
+  rm ${PIDCNVRT}
   sleep 5
 fi
 

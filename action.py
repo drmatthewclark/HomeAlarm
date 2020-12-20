@@ -21,7 +21,6 @@ import googlespeak as gs
 import functions 
 import time
 from multiprocessing import Process
-import customaction
 
 volume=90  # normally 100, set lower for testing
 silentAlarm = False
@@ -93,7 +92,6 @@ def water_alert(source):
 #
 def action(name, status_result, type):
    print("action: " + name + "," + status_result + "," + type)
-   customaction.action(name, status_result, type)
    status = functions.get_status()
    global silentAlarm
 

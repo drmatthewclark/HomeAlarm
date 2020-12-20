@@ -55,6 +55,7 @@
   <h0>
     Security Control
   </h0>
+
   <?php
   if ($trigger_status == 't') {
 	  echo "<input type='button' class='button' name='reset' value='reset alarm'>";
@@ -169,13 +170,12 @@
         ";
       }
 
-     pg_close($link);
+      echo "</table>";  // end of events table
 
-     echo "</table>";
-     /**/
-     $temperature = pg_query($tlink, "select name, round(temperature::numeric, 1) as t from data where name != 'familyroom2' and time  = (select max(time) from temperature) order by name;");
-     $ctime = pg_fetch_array(pg_query($tlink, "select to_char(max(time), 'HH24:MI') as time from temperature" ))["time"];
-     echo "<br><h1>Temperatures at " . $ctime . "</h1><br>";
+      // temperature table
+     $tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 100) a order by name";
+     $temperature = pg_query($tlink, $tquery);
+     echo "<br><h1>Temperatures</h1><br>";
      echo " <table id=\"tbl\">";
      echo "  <tr>";
      echo "   <th>Name</th>";
@@ -189,13 +189,36 @@
         $row = pg_fetch_array($temperature, $ri, PGSQL_ASSOC);
         echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
       }
+     pg_close($tlink);
      echo "</table>";
-      pg_close($tlink);
- /**/
+     echo "<br>";
+
+     // table for who is home and away
+     echo "<br><h1>Home</h1><br>";
+     echo " <table id=\"tbl\">";
+     echo "<tr>";
+     echo "<th>Time</th>";
+     echo "<th>Person</th>";
+     echo "<th>House</th>";
+     echo "</tr>";
+     $pq = "select to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home=true;";
+     $home = pg_query($link, $pq);
+     $numrows = pg_numrows($home);
+  
+      for($ri = 0; $ri < $numrows; $ri++) {
+         echo "<tr>\n";
+        $row = pg_fetch_array($home, $ri, PGSQL_ASSOC);
+        echo " <td>", $row["time"], "</td>
+        <td>", $row["person"], "</td>
+        <td>", $row["location"], "</td>
+        </tr>
+        ";
+	}
+     echo "</table>";
      echo time()-$start;
+     pg_close($link);
   ?>
- </table>
-</br> 
+
 
 <script>
         $("input[name='reset']").click(function() {

@@ -22,7 +22,6 @@ import sys
 import pychromecast
 import os
 import os.path
-from   gtts import gTTS
 import time
 import hashlib
 from   multiprocessing import Process
@@ -34,7 +33,7 @@ import functions
 # addresses of google home devices
 #broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
 #broadcast_addresses = {"192.168.20.97" } # basement
-
+#
 broadcast_addresses = functions.getGoogleHome()
 
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
@@ -56,11 +55,15 @@ def makefile(say):
    say = say.replace("_", " ")  # replace underscores
 
    tmppath= "/var/www/html" 
-   fname= mp3dir + hashlib.md5(say.encode()).hexdigest()+".mp3"; #create md5 filename for caching
+   fname= mp3dir + hashlib.md5(say.encode()).hexdigest()+".wav"; #create md5 filename for caching
+   lfname = tmppath + fname
 
-   if not os.path.isfile(tmppath+fname):
-      tts = gTTS(say,lang='en')
-      tts.save(tmppath+fname)
+   if not os.path.isfile(lfname) or os.path.getsize(lfname) == 0:
+      cmd = '/usr/bin/pico2wave -w ' + lfname + ' "' + say + '"'
+      os.system(cmd)
+      fsize = os.path.getsize(lfname)
+      if fsize == 0:
+          fname = None
 
    return fname
 
@@ -127,7 +130,9 @@ def playmp3(soundfile, volume):
 
    # play over pi speaker 
    if usePiSpeaker:
-     os.system('/usr/bin/mpg321 ' + systemvol +  " /var/www/html" + soundfile  + ' &')
+       cmd =  '/usr/bin/mpg321 ' + systemvol +  " /var/www/html" + soundfile  + ' &'
+       print('cmd is ', cmd)
+       os.system(cmd)
 
    if useGoogleHome:
      processes = []

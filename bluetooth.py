@@ -2,15 +2,19 @@
 import paho.mqtt.client as mqtt
 import time
 import os
-import psycopg2
-import sys
 from multiprocessing import Process
+import googlespeak
 
 # topic with status
 topic = 'home'
 user = 'alarm'
 host_name = 'alarm'
 process = None
+
+# count number of people who are home
+statusquery = 'select count(person)  from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home= true;'
+
+currentCount = None  # number of people home
 
 def on_message(client, userdata, message):
     msg =  str(message.payload.decode("utf-8")).split(",")
@@ -26,9 +30,11 @@ def on_message(client, userdata, message):
     insert_record(time, locale, person, home)
 
 
-def insert_record(time, locale, person, home):
-    con = None
 
+def insert_record(time, locale, person, home):
+    global currentCount
+
+    con = None
     try:
       con = psycopg2.connect('user=' + user )
       sql = "insert into bluetooth(time, location, person, home) values" \
@@ -39,6 +45,14 @@ def insert_record(time, locale, person, home):
          #print(cur.mogrify(sql, values ))
          cur.execute(sql, values)
          con.commit()
+
+      with con.cursor() as cur:
+        cur.execute(statusquery)
+        count = cur.fetchone()
+        if currentCount == None:
+            currentCount = count
+
+        currentCount = count
 
     except:
        print("insert_record error", sys.exc_info()[0])

@@ -49,7 +49,11 @@ def insert_record( values ):
 
       with con.cursor() as cur:
          cur.execute(query_sql, (person,) )
-         status = cur.fetchone()[0]
+         if cur.rowcount > 0:
+            status = cur.fetchone()[0]
+         else:
+             status = 'init'
+             homeb = 'False'
 
          if status != homeb:
             print('db ', cur.mogrify(insert_sql, values ))

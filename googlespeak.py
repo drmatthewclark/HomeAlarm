@@ -150,7 +150,7 @@ def playmp3(soundfile, volume):
 #------------------------
 # announce the text
 #------------------------
-def announce(text, volume):
+def announce(text, volume=100):
    print("announce: " + text)
    soundfile = makefile(text)
    playmp3(soundfile, volume)

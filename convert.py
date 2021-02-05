@@ -207,7 +207,11 @@ def startThread(funcname, args):
 
 
 def killsignal(signalNumber, frame):
-    os.killpg(os.getpgid(radioprocess.pid),signal.SIGTERM)
+    try:
+        os.killpg(os.getpgid(radioprocess.pid),signal.SIGTERM)
+    except:
+        pass # nothing to do here if it throws an error
+
     temp_warn.stop()
     blue.stop()
     print("handling SIGTERM")

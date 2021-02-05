@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+along with HomeAlarm.  If not, see <https://www.gnu.org/licenses/>.
 
 Copyright Matthew Clark 2020
 
@@ -30,6 +30,7 @@ import functions
 
 volume = 80
 process = None
+running = True
 
 def checkTemperature():
   LO_TEMP="38"
@@ -58,7 +59,7 @@ def checkTemperature():
 
 def warn():
     print("starting temperature monitor")
-    while True:
+    while running:
         checkTemperature()
         time.sleep(60 + random.randint(-10, 10))
 
@@ -68,5 +69,7 @@ def start():
     process.start()
 
 def stop():
+    global process
+    global running
     print("stopping temperature process")
-    process.terminate()
+    running = False

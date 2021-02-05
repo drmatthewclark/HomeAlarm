@@ -28,7 +28,7 @@ from   multiprocessing import Process
 import datetime
 import socket
 import functions
-
+import random
 # 
 # addresses of google home devices
 #broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
@@ -61,6 +61,7 @@ def makefile(say):
    if not os.path.isfile(lfname) or os.path.getsize(lfname) == 0:
       cmd = '/usr/bin/pico2wave -w ' + lfname + ' "' + say + '"'
       os.system(cmd)
+
       fsize = os.path.getsize(lfname)
       if fsize == 0:
           fname = None
@@ -83,7 +84,8 @@ def speak(ip, fname, volume):
    #castdevice.set_volume(0.0) #set volume 0 for not hear the BEEEP
    mc = castdevice.media_controller
    url="http://" + local_ip + fname
-   mc.play_media(url, "audio/mp3")
+   print(url)
+   mc.play_media(url, "audio/wav")
    mc.block_until_active()
    mc.pause() #prepare audio and pause...
    time.sleep(1.0);
@@ -127,10 +129,11 @@ def playmp3(soundfile, volume):
      if (float(volume) > 1):        # convert 0-100 to 0-1
        volume=float(volume)/100.0
      systemvol= " --gain " + str(round(float(volume), 2))
-
+     systemvol= " --gain 0.9" 
+        
    # play over pi speaker 
    if usePiSpeaker:
-       cmd =  '/usr/bin/mpg321 ' + systemvol +  " /var/www/html" + soundfile  + ' &'
+       cmd =  '/usr/bin/mpg321 -q ' + systemvol +  " /var/www/html" + soundfile  + ' &'
        print('cmd is ', cmd)
        os.system(cmd)
 

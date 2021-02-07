@@ -1,0 +1,23 @@
+#
+# copy to /lib/systemd/system/alarm.service
+# sudo cp alarm.service /lib/systemd/system/alarm.service
+# sudo chmod 644 /lib/systemd/system/alarm.service
+# sudo systemctl enable myservice
+#
+[Unit]
+Description=alarm system service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=pi
+
+Restart=always
+RestartSec=1
+
+ExecStart=/home/pi/convert.py
+KillSignal = 9
+
+[Install]
+WantedBy=multi-user.target

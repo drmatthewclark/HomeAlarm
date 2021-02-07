@@ -101,7 +101,7 @@ def process(line):
   try:
     parsed = json.loads(line)
   except:
-    print("eror json parsing: " + line)
+      print("convert.py: error parsing json: " + line)
     return
 
   deviceId = parsed["id"]
@@ -207,13 +207,23 @@ def startThread(funcname, args):
 
 
 def killsignal(signalNumber, frame):
+
+    signal.signal(signal.SIGTERM, original_sigint_handler)
     try:
         os.killpg(os.getpgid(radioprocess.pid),signal.SIGTERM)
     except:
         pass # nothing to do here if it throws an error
 
-    temp_warn.stop()
-    blue.stop()
+    try:
+        temp_warn.stop()
+    except:
+        pass
+
+    try:
+        blue.stop()
+    except:
+        pass
+
     print("handling SIGTERM")
 
 
@@ -243,4 +253,6 @@ def main():
    line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
    process(line)
 
+# save this
+original_sigint_handler = signal.getsignal(signal.SIGINT) 
 main()

@@ -31,7 +31,7 @@ silentAlarm = False
 # use current googleplay volume
 #'''
 def door_alert(source):
-    gs.announce(source, None)
+    gs.announce(source)
 
 
 #'''

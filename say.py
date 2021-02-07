@@ -7,5 +7,5 @@ text = ""
 for i in range(1, len(sys.argv)):
         text += " " + sys.argv[i]
 
-googlespeak.main(text , 20)
+googlespeak.main(text , 50)
 

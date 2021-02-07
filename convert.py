@@ -102,7 +102,7 @@ def process(line):
     parsed = json.loads(line)
   except:
       print("convert.py: error parsing json: " + line)
-    return
+      return
 
   deviceId = parsed["id"]
   eventTime = parsed["time"]

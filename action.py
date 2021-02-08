@@ -118,14 +118,4 @@ def action(name, status_result, type):
    elif status["door alert"] and type in ("door", "window"):
       door_alert(name + " " + status_result)
 
-#
-# start a function in a thread
-#
-def startThread(funcname, args):
-      Process(target = funcname, args=args).start()
-
-
-# test
-#action("front door", "open", "door")  
-#print(functions.get_status()["triggered"] )
- 
+   return

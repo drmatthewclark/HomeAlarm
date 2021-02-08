@@ -31,6 +31,7 @@ import functions
 volume = 80
 process = None
 running = True
+host = 'pi'
 
 def checkTemperature():
   LO_TEMP="38"
@@ -43,8 +44,13 @@ def checkTemperature():
             group by name, time, temperature;"
 
   vals=(LO_TEMP, HI_TEMP)
+  conn = None
+  try:
+    conn = psql.connect(user='sensor', host=host)
+  except:
+      print('check_temperature: error connecting to host', host)
+    return
 
-  conn = psql.connect(user='sensor', host='pi')
   with conn.cursor() as cur:
     cur.execute(query, vals)
     for dev in cur.fetchall():

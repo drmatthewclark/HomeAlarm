@@ -46,10 +46,10 @@ def checkTemperature():
   vals=(LO_TEMP, HI_TEMP)
   conn = None
   try:
-    conn = psql.connect(user='sensor', host=host)
+      conn = psql.connect(user='sensor', host=host)
   except:
       print('check_temperature: error connecting to host', host)
-    return
+      return
 
   with conn.cursor() as cur:
     cur.execute(query, vals)

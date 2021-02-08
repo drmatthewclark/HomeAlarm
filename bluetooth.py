@@ -13,7 +13,6 @@ process = None
 client  = None
 
 # count number of people who are home
-statusquery = 'select count(person)  from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home= true;'
 
 insert_sql = "insert into bluetooth(time, location, person, home) values (to_timestamp(%s), %s, %s, %s );"
 query_sql  = "select home from bluetooth where person = %s and location = %s order by time desc limit 1"
@@ -66,7 +65,7 @@ def insert_record( values ):
     except:
        print("insert_record error", sys.exc_info()[0])
     finally:
-        con.close
+        con.close()
 
 
 def main():

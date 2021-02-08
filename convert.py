@@ -169,6 +169,7 @@ def process(line):
   conn.close()
   if loglevel:
     print(deviceName + " flag:" + str(flag) + " " +  line)
+
   # if action is warranted:
   #
   if flag:

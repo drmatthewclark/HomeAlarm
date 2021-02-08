@@ -91,7 +91,7 @@ def water_alert(source):
 # type - type - door/window/fire/motion/water
 #
 def action(name, status_result, type):
-   print("action: " + name + "," + status_result + "," + type)
+   #print("action: " + name + "," + status_result + "," + type)
    status = functions.get_status()
    global silentAlarm
 

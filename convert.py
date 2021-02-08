@@ -38,6 +38,7 @@ from multiprocessing import Process
 import temperature_warning as temp_warn
 import bluetooth as blue
 
+loglevel = False
 radioprocess = None
 #
 # initialize the status bits for Honeywell sensors
@@ -153,7 +154,8 @@ def process(line):
     if (status[val] & device["code"] == 0 and (status[val] & eventCode) != 0):
       status_result = status_result + "," + val
 
-  print("status: " + status_result)
+  if loglevel:
+      print("status: " + status_result)
 
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
@@ -165,8 +167,8 @@ def process(line):
 
   conn.commit()
   conn.close()
-
-  print(deviceName + " flag:" + str(flag) + " " +  line)
+  if loglevel:
+    print(deviceName + " flag:" + str(flag) + " " +  line)
   # if action is warranted:
   #
   if flag:
@@ -202,7 +204,9 @@ def startThread(funcname, args):
       else:
           arg = str(args) 
 
-      print("start action thread " + funcname.__name__ + " " + arg)
+      if loglevel:
+        print("start action thread " + funcname.__name__ + " " + arg)
+
       Process(target = funcname, args=args).start()
 
 

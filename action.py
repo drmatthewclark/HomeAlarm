@@ -43,6 +43,7 @@ def fire_alert(source):
    alert = "fire alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "fire")
+
    while functions.get_status()["triggered"] and not silentAlarm:
        gs.announce("FIRE " + source  + " FIRE " + source , volume)
        time.sleep(1.0)
@@ -59,9 +60,12 @@ def alarm_alert(source):
    alert = "alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "alarm")
-   gs.announce("alarm alarm alarm " + source + " violated  " , volume) 
-   time.sleep(1.0)
-   gs.announce("police dispatch confirmed", volume)
+
+   if not silentAlarm:   
+   	gs.announce("alarm alarm alarm " + source + " violated  " , volume) 
+   	time.sleep(1.0)
+   	gs.announce("police dispatch confirmed", volume)
+
    while functions.get_status()["triggered"] and not silentAlarm:
         gs.announce("alarm" + source + " violated  " , volume) 
         time.sleep(1.0)

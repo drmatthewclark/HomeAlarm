@@ -40,11 +40,11 @@ def get_status():
 #-------------------------------
 # get broadcast addresses for google home devices
 #-------------------------------
-def getGoogleHome():
+def getGoogleHome(spkr='%'):
    conn = psql.connect(user='alarm')
    result = []
    with conn.cursor() as cur:
-      cur.execute("select contact from contacts where type = 'google';")
+      cur.execute("select contact from contacts where type = 'google' and note like %s;", (spkr,) )
       for r in cur.fetchall():
         result.append(r[0])
    conn.close()

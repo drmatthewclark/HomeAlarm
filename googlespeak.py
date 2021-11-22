@@ -34,7 +34,8 @@ import random
 #broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
 #broadcast_addresses = {"192.168.20.97" } # basement
 #
-broadcast_addresses = functions.getGoogleHome()
+#broadcast_addresses = functions.getGoogleHome()
+
 casts = []
 fpath= '/var/www/html'
 mp3dir="/5920ddcqeag/"    # system-dependent directory to cache sound files
@@ -127,7 +128,7 @@ def main(say, volume):
 #--------------------------------
 #  play a mp3 file 
 #--------------------------------
-def playmp3(soundfile, volume):
+def playmp3(soundfile, volume, spkr='%'):
 
    if not soundfile.startswith(mp3dir):
        soundfile = mp3dir + soundfile
@@ -144,6 +145,8 @@ def playmp3(soundfile, volume):
    if useGoogleHome:
      processes = []
 
+     broadcast_addresses = functions.getGoogleHome(spkr)
+
      for address in broadcast_addresses:
         if '.' in address:
             p = Process(target = speak, args=(address, soundfile, volume))
@@ -158,7 +161,7 @@ def playmp3(soundfile, volume):
 #------------------------
 # announce the text
 #------------------------
-def announce(text, volume=0.50):
+def announce(text, volume=0.50, spkr='%'):
    # google volume range is 0-1
    if volume is None:
        volume = 0.5
@@ -166,8 +169,8 @@ def announce(text, volume=0.50):
    if volume > 1.0:
        volume /= 100.0
 
-   print("announce: " + text, 'volume', volume)
+   print("announce: " + text, 'volume', volume, spkr)
    soundfile = makefile(text)
-   playmp3(soundfile, volume)
+   playmp3(soundfile, volume, spkr)
 
 

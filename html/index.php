@@ -173,7 +173,11 @@
       echo "</table>";  // end of events table
 
       // temperature table
-     $tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 100) a order by name";
+     //$tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 100) a order by name";
+
+     $tquery = "select data.name, round(temperature::numeric,0) as t from data, (select name, max(time) as mtime from data where time > (now() - INTERVAL '3 hours')  group by name) a  where a.name = data.name and a.mtime = data.time order by data.name;";
+
+
      $temperature = pg_query($tlink, $tquery);
      echo "<br><h1>Temperatures</h1><br>";
      echo " <table id=\"tbl\">";

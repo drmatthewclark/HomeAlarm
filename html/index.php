@@ -11,9 +11,10 @@
  $start = time();
   try {
     $link = pg_pconnect("dbname=alarm user=alarm");
-
+    pg_query($link, "set statement_timeout to 5000;" );
     if (!isset($tlink)) {
       $tlink = pg_pconnect("user=sensor host=pi");
+      pg_query($tlink, "set statement_timeout to 5000;" );
     }
   } catch (Exception $e) {
 	echo "Exception ", $e->getMessage(), "\n";
@@ -172,13 +173,10 @@
 
       echo "</table>";  // end of events table
 
-      // temperature table
-     //$tquery = "select  distinct on (name) name, round(temperature::numeric,0) as t from (select * from data order by time desc limit 100) a order by name";
 
-     $tquery = "select data.name, round(temperature::numeric,0) as t from data, (select name, max(time) as mtime from data where time > (now() - INTERVAL '3 hours')  group by name) a  where a.name = data.name and a.mtime = data.time order by data.name;";
+     $dquery = "select name from devices order by name";
+     $dlist   = pg_query($tlink, $dquery);
 
-
-     $temperature = pg_query($tlink, $tquery);
      echo "<br><h1>Temperatures</h1><br>";
      echo " <table id=\"tbl\">";
      echo "  <tr>";
@@ -187,11 +185,15 @@
      echo "  </tr>";
 
       // Loop on rows in the result set.
-      $numrows = pg_numrows($temperature);
+      $numrows = pg_numrows($dlist);
+
       for($ri = 0; $ri < $numrows; $ri++) {
         echo "<tr>";
-        $row = pg_fetch_array($temperature, $ri, PGSQL_ASSOC);
-        echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
+        $device = pg_fetch_result($dlist, $ri, 0);
+	$tquery = "select name, ceil(temperature) as t from data where name = '" . $device . "' limit 1;";
+	$row = pg_fetch_array(  pg_query($tlink, $tquery), 0 ,PGSQL_ASSOC);
+        //echo " <td>", $row["name"], "</td><td>",$row["t"],"</td></tr>";
+        echo " <td>", $device, "</td><td>",$row["t"],"</td></tr>";
       }
      pg_close($tlink);
      echo "</table>";

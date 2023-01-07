@@ -34,7 +34,7 @@ running = True
 host = 'pi'
 
 def checkTemperature():
-  LO_TEMP="38"
+  LO_TEMP="35"
   HI_TEMP="115"
 
   query="select distinct on(name) name, round(temperature::numeric, 0) \

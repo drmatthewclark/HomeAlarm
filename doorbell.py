@@ -1,8 +1,8 @@
+#!/usr/bin/python3
 #
 # poll doorbell.  this will check battery status.
 #
 import RPi.GPIO as GPIO
-import time
 import googlespeak
  
 PIN=7 
@@ -16,11 +16,15 @@ def main():
    GPIO.setmode(GPIO.BOARD)
    GPIO.setup(PIN, GPIO.IN)
    GPIO.add_event_detect(PIN, GPIO.BOTH, callback=doorbell)
-
    state = GPIO.input(PIN)
-   print("GPIO state is " + str(state))
 
-   while True:
-        time.sleep(3600)
+   if state == 1:
+      battery = 'good'
+   else:
+      battery = 'low'
+      googlespeak.announce('doorbell battery is low')
+
+   print('battery is ', battery)
+
 
 main()

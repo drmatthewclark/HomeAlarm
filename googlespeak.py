@@ -95,7 +95,7 @@ def speak(ip, fname, volume):
    mc.play_media(url, "audio/wav")
    mc.block_until_active()
    mc.pause() #prepare audio and pause...
-   #time.sleep(1.0);
+   time.sleep(0.5);
 
    # google volume is 0-1
    if not volume is None:
@@ -104,12 +104,12 @@ def speak(ip, fname, volume):
    mc.play() #play the mp3
    castdevice.wait()
    # this is required
-   time.sleep(1.0)
+   time.sleep(1.5)
   
    # wait for it to be done
    while not mc.status.player_is_idle:
       castdevice.wait()
-      time.sleep(0.5)
+      time.sleep(2.0)
 
    if not volume is None:   
       castdevice.set_volume(vol_previous) 
@@ -153,8 +153,11 @@ def playmp3(soundfile, volume, spkr='%'):
             p.start()
             processes.append(p)
 
+	
+     time.sleep(1.0)
      for process in processes:
         process.join()
+
 
      time.sleep(1.0)
 

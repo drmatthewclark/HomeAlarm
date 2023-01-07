@@ -58,7 +58,7 @@ def insert_record( values ):
 
          #print('person', person, 'status', status, 'home', home)
          if status != home:
-            print('update db - ', cur.mogrify(insert_sql, values ))
+            #print('update db - ', cur.mogrify(insert_sql, values ))
             cur.execute(insert_sql, values)
             con.commit()
 

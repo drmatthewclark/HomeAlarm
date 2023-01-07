@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.13
--- Dumped by pg_dump version 9.6.13
+-- Dumped from database version 9.6.20
+-- Dumped by pg_dump version 9.6.20
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -129,7 +129,7 @@ ALTER TABLE public.events OWNER TO alarm;
 
 CREATE VIEW public.lastalert AS
  SELECT events.source,
-    to_char(max(events."time"), 'dd Mon yyyy hh24:mi'::text) AS "time",
+    to_char(max(events."time"), 'dd Mon yyyy hh12:mi am'::text) AS "time",
     events.event
    FROM public.events
   WHERE (events.flag = true)
@@ -212,6 +212,13 @@ CREATE INDEX bluetooth_time_idx ON public.bluetooth USING btree ("time");
 --
 
 CREATE INDEX devices_normal_idx ON public.devices USING btree (normal);
+
+
+--
+-- Name: devices_number_idx; Type: INDEX; Schema: public; Owner: alarm
+--
+
+CREATE INDEX devices_number_idx ON public.devices USING btree (number);
 
 
 --

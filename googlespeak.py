@@ -62,6 +62,7 @@ def makefile(say):
 
    if not os.path.isfile(lfname) or os.path.getsize(lfname) == 0:
       cmd = '/usr/bin/pico2wave -w ' + lfname + ' "' + say + '"'
+      print(cmd)
       os.system(cmd)
 
       fsize = os.path.getsize(lfname)
@@ -81,7 +82,9 @@ def speak(ip, fname, volume):
 
    castdevice = None 
    try:
-     castdevice = pychromecast.Chromecast(ip)
+     #castdevice = pychromecast.Chromecast(ip)
+     host = (ip, 0, None, '', '' )
+     castdevice = pychromecast.get_chromecast_from_host(host)
    except:
      print('error contacting google device at ', ip)
      return

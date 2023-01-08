@@ -38,7 +38,7 @@ from multiprocessing import Process
 import temperature_warning as temp_warn
 import bluetooth as blue
 
-loglevel = False
+loglevel =  False
 radioprocess = None
 #
 # initialize the status bits for Honeywell sensors

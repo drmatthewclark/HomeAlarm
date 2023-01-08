@@ -16,7 +16,7 @@ User=pi
 Restart=always
 RestartSec=1
 
-ExecStart=/home/pi/convert.py
+ExecStart=/home/pi/HomeAlarm/convert.py
 KillSignal = 9
 
 [Install]

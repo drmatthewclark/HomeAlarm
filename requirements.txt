@@ -18,7 +18,7 @@ psycopg2==2.8.6
 PyChromecast==13.0.4
 python-apt==2.2.1
 python-prctl==1.7
-requests==2.25.1
+requests==2.31.0
 RPi.GPIO==0.7.0
 simplejpeg==1.6.4
 six==1.16.0

@@ -258,6 +258,8 @@ def main():
    line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
    process(line)
 
-# save this
-original_sigint_handler = signal.getsignal(signal.SIGINT) 
-main()
+
+if __name__ == "__main__":
+    # save this
+    original_sigint_handler = signal.getsignal(signal.SIGINT) 
+    main()

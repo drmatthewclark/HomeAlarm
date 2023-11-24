@@ -3,28 +3,39 @@
 # poll doorbell.  this will check battery status.
 #
 import RPi.GPIO as GPIO
-import googlespeak
- 
-PIN=7 
+from signal import pause
+from time import sleep
+import time
+import functions
+from multiprocessing import Process
+PIN=11 
+DELAY=10
+last_time=0 
+
+def doorbell():
+    print('doorbell', time.time() )
+    functions.text('doorbell rung')
 
 
-def doorbell(channel):
-    print("doorbell battery low")
+def raw_doorbell(channel):
+
+    global last_time
+    state = GPIO.input(PIN)
+    now = time.time()
+    delay = now - last_time
+    last_time = now
+
+    if delay > DELAY:
+        doorbell()
 
 
-def main():
+def listen():
    GPIO.setmode(GPIO.BOARD)
    GPIO.setup(PIN, GPIO.IN)
-   GPIO.add_event_detect(PIN, GPIO.BOTH, callback=doorbell)
-   state = GPIO.input(PIN)
-
-   if state == 1:
-      battery = 'good'
-   else:
-      battery = 'low'
-      googlespeak.announce('doorbell battery is low')
-
-   print('battery is ', battery)
+   GPIO.add_event_detect(PIN, GPIO.RISING, callback=raw_doorbell)
+   pause()
 
 
-main()
+p = Process(target=listen)
+p.start()
+

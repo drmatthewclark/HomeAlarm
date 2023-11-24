@@ -37,6 +37,7 @@ import action
 from multiprocessing import Process
 import temperature_warning as temp_warn
 import bluetooth as blue
+import doorbell
 
 loglevel =  False
 radioprocess = None

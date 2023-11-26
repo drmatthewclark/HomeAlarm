@@ -38,8 +38,9 @@ from multiprocessing import Process
 import temperature_warning as temp_warn
 import bluetooth as blue
 import doorbell
+import logging
+logging.basicConfig(level=logging.INFO)
 
-loglevel =  False
 radioprocess = None
 #
 # initialize the status bits for Honeywell sensors
@@ -155,8 +156,7 @@ def process(line):
     if (status[val] & device["code"] == 0 and (status[val] & eventCode) != 0):
       status_result = status_result + "," + val
 
-  if loglevel:
-      print("status: " + status_result)
+  logging.info("status: " + status_result) 
 
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
@@ -168,8 +168,8 @@ def process(line):
 
   conn.commit()
   conn.close()
-  if loglevel:
-    print(deviceName + " flag:" + str(flag) + " " +  line)
+
+  logging.debug(deviceName + " flag:" + str(flag) + " " +  line)
 
   # if action is warranted:
   #
@@ -206,8 +206,7 @@ def startThread(funcname, args):
       else:
           arg = str(args) 
 
-      if loglevel:
-        print("start action thread " + funcname.__name__ + " " + arg)
+      logging.info("start action thread " + funcname.__name__ + " " + arg)
 
       Process(target = funcname, args=args).start()
 
@@ -238,6 +237,8 @@ def killsignal(signalNumber, frame):
 #-------------------------
 def main():
   signal.signal(signal.SIGTERM, killsignal)
+
+  logging.info('alarm process starting')
 
   # start temperature monitor
   temp_warn.start()

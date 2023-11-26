@@ -21,6 +21,7 @@ import googlespeak as gs
 import functions 
 import time
 from multiprocessing import Process
+import logging
 
 volume=90  # normally 100, set lower for testing
 silentAlarm = False
@@ -43,6 +44,7 @@ def fire_alert(source):
    alert = "fire alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "fire")
+   logging.warning('FIRE ALERT - ' + source )
 
    while functions.get_status()["triggered"] and not silentAlarm:
        gs.announce("FIRE " + source  + " FIRE " + source , volume)
@@ -60,6 +62,8 @@ def alarm_alert(source):
    alert = "alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "alarm")
+
+   logging.warning('ALARM ALERT - ' + source )
 
    if not silentAlarm:   
    	gs.announce("alarm alarm alarm " + source + " violated  " , volume) 
@@ -81,6 +85,8 @@ def water_alert(source):
     alert = "water " + source
     functions.smail(alert)
     functions.log_action(alert, "water")
+    logging.warning('water alert ' + source )
+
     while functions.get_status()["triggered"]:
         gs.announce("water detected " + source + " water detected", volume)
         time.sleep(1.0)

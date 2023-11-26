@@ -8,9 +8,11 @@ from time import sleep
 import time
 import functions
 from multiprocessing import Process
-PIN=11 
-DELAY=10
-last_time=0 
+
+PIN=11  # gpio pi
+BOUNCETIME=5000  # bouncetime betwween events, millliseconds
+DELAY=30  # only trigger  this often, seconds
+last_time=0  # last event time
 
 def doorbell():
     print('doorbell', time.time() )
@@ -32,10 +34,9 @@ def raw_doorbell(channel):
 def listen():
    GPIO.setmode(GPIO.BOARD)
    GPIO.setup(PIN, GPIO.IN)
-   GPIO.add_event_detect(PIN, GPIO.RISING, callback=raw_doorbell)
+   GPIO.add_event_detect(PIN, GPIO.RISING, callback=raw_doorbell, bouncetime=BOUNCETIME)
    pause()
 
-
-p = Process(target=listen)
+p = Process(name='doorbell', target=listen)
 p.start()
 

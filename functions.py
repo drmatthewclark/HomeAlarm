@@ -22,12 +22,26 @@ Copyright Matthew Clark 2020
 import psycopg2 as psql
 import os
 import time
+import logging
+
+#--------------------------------------------
+# encapusulate connection
+#--------------------------------------------
+
+def get_conn():
+	conn = None
+	try:
+		conn= psql.connect(user='alarm')
+	except Exception as error:
+		logging.ERROR('error connecting ' + str(error) )
+
+	return conn	
 
 #--------------------------------------------
 # get settings for which alarms are enabled
 #--------------------------------------------
 def get_status():
-   conn = psql.connect(user='alarm')
+
    with conn.cursor() as cur:
      cur.execute("select category, enabled from state;")
      status = dict()

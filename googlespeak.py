@@ -29,6 +29,7 @@ import datetime
 import socket
 import functions
 import random
+import logging
 # 
 # addresses of google home devices
 #broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
@@ -64,10 +65,11 @@ def makefile(say):
       cmd = '/usr/bin/pico2wave -w ' + lfname + ' "' + say + '"'
       print(cmd)
       os.system(cmd)
-
+      logging.debug('created sound file' + lfname)
       fsize = os.path.getsize(lfname)
       if fsize == 0:
           fname = None
+          logging.error('file size was zero ' + lfname)
 
    return fname
 
@@ -87,6 +89,7 @@ def speak(ip, fname, volume):
      castdevice = pychromecast.get_chromecast_from_host(host)
    except:
      print('error contacting google device at ', ip)
+     logging.error('error contacting googledevice ' + str(ip) )
      return
 
    castdevice.wait()
@@ -168,6 +171,8 @@ def playmp3(soundfile, volume, spkr='%'):
 # announce the text
 #------------------------
 def announce(text, volume=0.50, spkr='%'):
+
+   logging.info('announcing ' + text )
    # google volume range is 0-1
    if volume is None:
        volume = 0.5

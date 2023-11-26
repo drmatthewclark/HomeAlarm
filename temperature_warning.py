@@ -27,6 +27,7 @@ import random
 from multiprocessing import Process
 import googlespeak as gs
 import functions
+import logging
 
 volume = 80
 process = None
@@ -60,16 +61,17 @@ def checkTemperature():
        print(warn)
        functions.smail(warn)
        gs.announce(warn, volume)
+       logging.warning(warn)
 
   conn.close()
 
 def warn():
-    print("starting temperature monitor")
     while running:
         checkTemperature()
         time.sleep(60 + random.randint(-10, 10))
 
 def start():
+    logging.info("starting temperature monitor")
     global process
     process = Process(target = warn, name = 'temperature')
     process.start()
@@ -77,5 +79,5 @@ def start():
 def stop():
     global process
     global running
-    print("stopping temperature process")
+    logging.info("stopping temperature process")
     running = False

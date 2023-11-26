@@ -3,6 +3,8 @@
 import paho.mqtt.client as mqtt
 import time
 import os
+import sys
+import logging
 import psycopg2
 from multiprocessing import Process
 
@@ -33,13 +35,13 @@ def decode_home(home):
 def on_message(client, userdata, message):
 
     msg =  str(message.payload.decode("utf-8")).split(",")
-    #print('recieved msg ', msg)
+    logging.debug('recieved msg ' + message.payload.decode('utf-8') )
     time   = msg[0]
     locale = msg[1]
     person = msg[2]
     home   = decode_home(msg[3])
 
-    insert_record( (time, locale, person, home) )
+    insert_record( (str(time), locale, person, home) )
 
 
 def insert_record( values ):
@@ -57,14 +59,15 @@ def insert_record( values ):
              status = 'init'
              home = 'False'
 
-         #print('person', person, 'status', status, 'home', home)
+         logging.debug('person ' + person +  ' status '+ str(status) + ' home '+ str(home))
+
          if status != home:
-            #print('update db - ', cur.mogrify(insert_sql, values ))
+            logging.debug('update db - ' + cur.mogrify(insert_sql, values ))
             cur.execute(insert_sql, values)
             con.commit()
 
     except:
-       print("insert_record error", sys.exc_info()[0])
+       logging.error("bluetooth insert_record error " +  str(values) + ':' + str(sys.exc_info()[0])  + ':' + str(sys.exc_info()[1]) ) 
     finally:
         con.close()
 
@@ -79,12 +82,14 @@ def main():
 
 # start process in thread
 def start():
+    logging.info('started bluetooth listener')
     global process
     process = Process(target=main,name='bluetooth')
-    print('starting bluetooth listener')
     process.start()
 
 def stop():
-    print("stopping bluetooth process")
+    global process
+    logging.info('stopping bluetooth listener')
     client.stop()
+    process.terminate()
 

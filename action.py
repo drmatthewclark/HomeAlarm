@@ -39,12 +39,11 @@ def door_alert(source):
 # sound fire alarm, log action, send emails
 #'''
 def fire_alert(source):
-   print("*** fire alert: " + source)
    functions.trigger()
    alert = "fire alarm " + source
    functions.smail(alert)
    functions.log_action(alert, "fire")
-   logging.warning('FIRE ALERT - ' + source )
+   logging.warning('** FIRE ALERT - ' + source )
 
    while functions.get_status()["triggered"] and not silentAlarm:
        gs.announce("FIRE " + source  + " FIRE " + source , volume)
@@ -57,7 +56,6 @@ def fire_alert(source):
 # sound the alarm
 #''' 
 def alarm_alert(source):
-   print("*** alarm alert: " + source)
    functions.trigger()
    alert = "alarm " + source
    functions.smail(alert)
@@ -80,7 +78,6 @@ def alarm_alert(source):
 # sound water alarm
 #
 def water_alert(source):
-    print("*** water alert: " + source)
     functions.trigger()
     alert = "water " + source
     functions.smail(alert)
@@ -101,7 +98,8 @@ def water_alert(source):
 # type - type - door/window/fire/motion/water
 #
 def action(name, status_result, type):
-   #print("action: " + name + "," + status_result + "," + type)
+
+   logging.debug("action: " + name + "," + status_result + "," + type)
    status = functions.get_status()
    global silentAlarm
 

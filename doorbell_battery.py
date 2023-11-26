@@ -4,6 +4,10 @@
 #
 import RPi.GPIO as GPIO
 import googlespeak
+import logging
+logging.basicConfig(level=logging.INFO)
+
+mesg = 'doorbell battery is %s'
  
 PIN=7 
 
@@ -14,11 +18,11 @@ def main():
 
    if state == 1:
       battery = 'good'
+      logging.info( mesg % ( battery,) )   
    else:
       battery = 'low'
-      googlespeak.announce('doorbell battery is low')
-
-   print('battery is', battery)
+      googlespeak.announce( mesg % (battery,) )
+      logging.warn( mesg % (battery,) )   
 
 
 main()

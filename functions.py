@@ -29,19 +29,21 @@ import logging
 #--------------------------------------------
 
 def get_conn():
-	conn = None
-	try:
-		conn= psql.connect(user='alarm')
-	except Exception as error:
-		logging.ERROR('error connecting ' + str(error) )
+    logging.debug('connecting to database') 
+    conn = None
+    try:
+       conn= psql.connect(user='alarm')
+    except Exception as error:
+       logging.error('error connecting ' + str(error) )
 
-	return conn	
+    return conn	
 
 #--------------------------------------------
 # get settings for which alarms are enabled
 #--------------------------------------------
 def get_status():
-
+   logging.debug('getting status')
+   conn = get_conn()
    with conn.cursor() as cur:
      cur.execute("select category, enabled from state;")
      status = dict()
@@ -55,7 +57,7 @@ def get_status():
 # get broadcast addresses for google home devices
 #-------------------------------
 def getGoogleHome(spkr='%'):
-   conn = psql.connect(user='alarm')
+   conn = get_conn()
    result = []
    with conn.cursor() as cur:
       cur.execute("select contact from contacts where type = 'google' and note like %s;", (spkr,) )
@@ -69,7 +71,8 @@ def getGoogleHome(spkr='%'):
 # send mail/text notifications
 #--------------------------------
 def smail(text):
-   conn = psql.connect(user='alarm')
+   logging.info('mailing ' + text)
+   conn = get_conn()
    with conn.cursor() as cur:
       cur.execute("select contact from contacts where type = 'email' or type = 'text';")
       for contact in cur.fetchall():
@@ -84,7 +87,8 @@ def smail(text):
 # send mail/text notifications
 #--------------------------------
 def text(text):
-   conn = psql.connect(user='alarm')
+   logging.info('texting ' + text )
+   conn = get_conn()
    with conn.cursor() as cur:
       cur.execute("select contact from contacts where type = 'text';")
       for contact in cur.fetchall():
@@ -100,11 +104,10 @@ def text(text):
 # log an action into the db
 #----------------------------
 def log_action(action, cause):
-
+    logging.info('action ' + action + ' ' + cause )
     sql="insert into actions (action, cause) values (%s, %s);"
     tuple=(action, cause)
- 
-    conn = psql.connect(user='alarm')
+    conn = get_conn() 
     with conn.cursor() as cur:
       cur.execute(sql, tuple)
     conn.commit()
@@ -117,8 +120,9 @@ def log_action(action, cause):
 # set the trigger flag when alarm is triggered
 #-----------------------------------------------
 def trigger():
+   logging.info('alarm triggered')
    cmd="update state set enabled = true where category = 'triggered';"
-   conn = psql.connect(user='alarm')
+   conn = get_conn()
    with conn.cursor() as cur:
      cur.execute(cmd)
    conn.commit()

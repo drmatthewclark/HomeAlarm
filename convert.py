@@ -35,12 +35,14 @@ import subprocess
 import shlex
 import action
 from multiprocessing import Process
+from pathlib import Path
 import temperature_warning as temp_warn
 import bluetooth as blue
 import doorbell
 import logging
 logging.basicConfig(level=logging.INFO)
 
+watchdogfile = '/tmp/homealarm.watchdog'
 radioprocess = None
 #
 # initialize the status bits for Honeywell sensors
@@ -100,11 +102,12 @@ def process(line):
   global lastalert
   guard_gap = 3.5  # seconds
   flag = False
+  logging.debug('data: ' + line)
 
   try:
     parsed = json.loads(line)
   except:
-      print("convert.py: error parsing json: " + line)
+      logging.error("convert.py: error parsing json: " + line)
       return
 
   deviceId = parsed["id"]
@@ -156,7 +159,7 @@ def process(line):
     if (status[val] & device["code"] == 0 and (status[val] & eventCode) != 0):
       status_result = status_result + "," + val
 
-  logging.info("status: " + status_result) 
+  logging.debug("status: " + status_result) 
 
   # save the event into the database
   sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
@@ -206,9 +209,10 @@ def startThread(funcname, args):
       else:
           arg = str(args) 
 
-      logging.info("start action thread " + funcname.__name__ + " " + arg)
+      logging.debug("start action thread " + funcname.__name__ + " " + arg)
 
       Process(target = funcname, args=args).start()
+
 
 
 def killsignal(signalNumber, frame):
@@ -229,7 +233,7 @@ def killsignal(signalNumber, frame):
     except:
         pass
 
-    print("handling SIGTERM")
+    logging.info("handling SIGTERM")
 
 
 #-------------------------
@@ -243,6 +247,7 @@ def main():
   # start temperature monitor
   temp_warn.start()
   blue.start()
+  doorbell.start()
 
   global deviceList, status, lastalert, radioprocess
   lastalert = dict()
@@ -257,11 +262,14 @@ def main():
 
   radioprocess = subprocess.Popen(shlex.split(cmd), bufsize=1,stdout=subprocess.PIPE, stdin=subprocess.PIPE) 
   while radioprocess.poll() == None:
-   line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
-   process(line)
+     line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
+     Path(watchdogfile).touch()  # watchdog file  
+     process(line)
 
+  logging.error('alarm main loop ended' )
 
 if __name__ == "__main__":
     # save this
     original_sigint_handler = signal.getsignal(signal.SIGINT) 
+    logging.info('alarm started')
     main()

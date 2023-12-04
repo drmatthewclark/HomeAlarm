@@ -10,7 +10,7 @@ from multiprocessing import Process
 
 # topic with status
 topic = 'home'
-user = 'alarm'
+USER = 'alarm'
 host_name = 'alarm'
 process = None
 client = None
@@ -50,26 +50,26 @@ def insert_record(values):
 
     con = None
     try:
-        con = psycopg2.connect('user=' + user)
+        con = psycopg2.connect('user=' + USER)
 
         with con.cursor() as cur:
             cur.execute(query_sql, (person, locale,))
             if cur.rowcount > 0:
-                status = bool(cur.fetchone()[0])
+                status = cur.fetchone()[0]
             else:
                 status = 'init'
                 home = 'False'
 
-            logging.debug('person ' + person + ' status ' +
+            logging.debug('person ' + str(person) + ' status ' +
                           str(status) + ' home ' + str(home))
 
             if status != home:
-                logging.debug('update db - ' + cur.mogrify(insert_sql, values))
+                logging.debug('update db - ' + cur.mogrify(insert_sql, values).decode('utf-8'))
                 cur.execute(insert_sql, values)
                 con.commit()
 
     except:
-        logging.error("bluetooth insert_record error " + str(values) +
+        logging.error("bluetooth insert_record error (" + str(time) + ',' + str(locale) + ',' + str(person) + ',' +str(home) + ')' +
                       ':' + str(sys.exc_info()[0]) + ':' + str(sys.exc_info()[1]))
     finally:
         con.close()

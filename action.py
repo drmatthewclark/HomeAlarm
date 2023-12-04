@@ -18,58 +18,58 @@ Copyright Matthew Clark 2020
 
 """
 import googlespeak as gs
-import functions 
+import functions
 import time
 from multiprocessing import Process
 import logging
 
-volume=90  # normally 100, set lower for testing
+volume = 90  # normally 100, set lower for testing
 silentAlarm = False
 
 
-#'''
+# '''
 # sound door alert
 # use current googleplay volume
-#'''
+# '''
 def door_alert(source):
     gs.announce(source)
 
 
-#'''
+# '''
 # sound fire alarm, log action, send emails
-#'''
+# '''
 def fire_alert(source):
-   functions.trigger()
-   alert = "fire alarm " + source
-   functions.smail(alert)
-   functions.log_action(alert, "fire")
-   logging.warning('** FIRE ALERT - ' + source )
+    functions.trigger()
+    alert = "fire alarm " + source
+    functions.smail(alert)
+    functions.log_action(alert, "fire")
+    logging.warning('** FIRE ALERT - ' + source)
 
-   while functions.get_status()["triggered"] and not silentAlarm:
-       gs.announce("FIRE " + source  + " FIRE " + source , volume)
-       time.sleep(1.0)
-       gs.playmp3("fire.mp3", volume)
-       time.sleep(1.0)
+    while functions.get_status()["triggered"] and not silentAlarm:
+        gs.announce("FIRE " + source + " FIRE " + source, volume)
+        time.sleep(1.0)
+        gs.playmp3("fire.mp3", volume)
+        time.sleep(1.0)
 
 
-#'''
+# '''
 # sound the alarm
-#''' 
+# '''
 def alarm_alert(source):
-   functions.trigger()
-   alert = "alarm " + source
-   functions.smail(alert)
-   functions.log_action(alert, "alarm")
+    functions.trigger()
+    alert = "alarm " + source
+    functions.smail(alert)
+    functions.log_action(alert, "alarm")
 
-   logging.warning('ALARM ALERT - ' + source )
+    logging.warning('ALARM ALERT - ' + source)
 
-   if not silentAlarm:   
-   	gs.announce("alarm alarm alarm " + source + " violated  " , volume) 
-   	time.sleep(1.0)
-   	gs.announce("police dispatch confirmed", volume)
+    if not silentAlarm:
+        gs.announce("alarm alarm alarm " + source + " violated  ", volume)
+        time.sleep(1.0)
+        gs.announce("police dispatch confirmed", volume)
 
-   while functions.get_status()["triggered"] and not silentAlarm:
-        gs.announce("alarm" + source + " violated  " , volume) 
+    while functions.get_status()["triggered"] and not silentAlarm:
+        gs.announce("alarm" + source + " violated  ", volume)
         time.sleep(1.0)
         gs.playmp3("sirenhilowithrumbler.wav", volume)
         time.sleep(0.5)
@@ -77,19 +77,20 @@ def alarm_alert(source):
 #
 # sound water alarm
 #
+
+
 def water_alert(source):
     functions.trigger()
     alert = "water " + source
     functions.smail(alert)
     functions.log_action(alert, "water")
-    logging.warning('water alert ' + source )
+    logging.warning('water alert ' + source)
 
     while functions.get_status()["triggered"]:
         gs.announce("water detected " + source + " water detected", volume)
         time.sleep(1.0)
         gs.announce("water detected " + source + " water detected", volume)
         time.sleep(60)
-
 
 
 #
@@ -99,31 +100,31 @@ def water_alert(source):
 #
 def action(name, status_result, type):
 
-   logging.debug("action: " + name + "," + status_result + "," + type)
-   status = functions.get_status()
-   global silentAlarm
+    logging.debug("action: " + name + "," + status_result + "," + type)
+    status = functions.get_status()
+    global silentAlarm
 
-   # set silent alarm status 
-   if status["silent-alarm"]:
-      silentAlarm = True
-   else:
-      silentAlarm = False
+    # set silent alarm status
+    if status["silent-alarm"]:
+        silentAlarm = True
+    else:
+        silentAlarm = False
 
 #
 # mutually exclusive alarms; only one will be activated
 # fire and water alarms always sound independent of other
 # settings
 
-   if   type == "fire":                    # fire alaerm
-      fire_alert(name)
-   elif type == "water":                   # water alarm
-      water_alert(name)
+    if type == "fire":                    # fire alaerm
+        fire_alert(name)
+    elif type == "water":                   # water alarm
+        water_alert(name)
 
-   elif status["alarm-stay"] and type in ("door", "window"):  # perimeter
-      alarm_alert(name)
-   elif status["alarm-away"]:  # all devices will set off alarm
-      alarm_alert(name)
-   elif status["door alert"] and type in ("door", "window"):
-      door_alert(name + " " + status_result)
+    elif status["alarm-stay"] and type in ("door", "window"):  # perimeter
+        alarm_alert(name)
+    elif status["alarm-away"]:  # all devices will set off alarm
+        alarm_alert(name)
+    elif status["door alert"] and type in ("door", "window"):
+        door_alert(name + " " + status_result)
 
-   return
+    return

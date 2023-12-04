@@ -34,47 +34,51 @@ process = None
 running = True
 host = 'pi'
 
-def checkTemperature():
-  LO_TEMP="35"
-  HI_TEMP="115"
 
-  query="select distinct on(name) name, round(temperature::numeric, 0) \
+def checkTemperature():
+    LO_TEMP = "35"
+    HI_TEMP = "115"
+
+    query = "select distinct on(name) name, round(temperature::numeric, 0) \
             from data where time = (select max(time) from temperature) \
             and (name != 'outside' and name not like 'hvac%%') \
             and (temperature < %s or temperature > %s) \
             group by name, time, temperature;"
 
-  vals=(LO_TEMP, HI_TEMP)
-  conn = None
-  try:
-      conn = psql.connect(user='sensor', host=host)
-  except:
-      print('check_temperature: error connecting to host', host)
-      return
+    vals = (LO_TEMP, HI_TEMP)
+    conn = None
+    try:
+        conn = psql.connect(user='sensor', host=host)
+    except:
+        print('check_temperature: error connecting to host', host)
+        return
 
-  with conn.cursor() as cur:
-    cur.execute(query, vals)
-    for dev in cur.fetchall():
-       name = str(dev[0]).replace("1","")
-       temp = str(dev[1])
-       warn = "temperature warning " + name + " " + temp + " degrees "
-       print(warn)
-       functions.smail(warn)
-       gs.announce(warn, volume)
-       logging.warning(warn)
+    with conn.cursor() as cur:
+        cur.execute(query, vals)
+        for dev in cur.fetchall():
+            name = str(dev[0]).replace("1", "")
+            temp = str(dev[1])
+            warn = "temperature warning " + name + " " + temp + " degrees "
+            print(warn)
+            functions.smail(warn)
+            gs.announce(warn, volume)
+            logging.warning(warn)
 
-  conn.close()
+    conn.close()
+
 
 def warn():
     while running:
         checkTemperature()
         time.sleep(60 + random.randint(-10, 10))
 
+
 def start():
     logging.info("starting temperature monitor")
     global process
-    process = Process(target = warn, name = 'temperature')
+    process = Process(target=warn, name='temperature')
     process.start()
+
 
 def stop():
     global process

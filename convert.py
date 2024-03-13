@@ -42,7 +42,6 @@ import doorbell
 import logging
 logging.basicConfig(level=logging.INFO)
 
-watchdogfile = '/tmp/homealarm.watchdog'
 radioprocess = None
 #
 # initialize the status bits for Honeywell sensors
@@ -268,7 +267,6 @@ def main():
         cmd), bufsize=1, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     while radioprocess.poll() == None:
         line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
-        Path(watchdogfile).touch()  # watchdog file
         process(line)
 
     logging.error('alarm main loop ended')

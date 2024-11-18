@@ -84,14 +84,14 @@ def smail(text):
             "select contact from contacts where type = 'email' or type = 'text';")
         for contact in cur.fetchall():
             email = contact[0]
-            cmd = 'echo "' + text + '" | mail -s "ALARM: ' + text + '" ' + email
+            cmd = 'echo "' + text + '" | mail -s "ALARM" ' + email
             log_action("email " + email, "alarm:" + text)
             os.system(cmd)
-            time.sleep(2)  # email system doesn't like too many messages/second
+            time.sleep(0.5)  # email system doesn't like too many messages/second
     conn.close()
 
 # --------------------------------
-# send mail/text notifications
+# send text notifications
 # --------------------------------
 
 
@@ -102,14 +102,14 @@ def text(text):
         cur.execute("select contact from contacts where type = 'text';")
         for contact in cur.fetchall():
             email = contact[0]
-            cmd = 'echo "' + text + '" | mail -s "ALARM: ' + text + '" ' + email
+            cmd = 'echo "' + text + '" | mail -s "ALARM" ' + email
             log_action("text " + email, "alarm:" + text)
             os.system(cmd)
-            time.sleep(2)  # email system doesn't like too many messages/second
+            time.sleep(0.5)  # email system doesn't like too many messages/second
     conn.close()
 
 
-# ----------------------------
+# ---------------------------
 # log an action into the db
 # ----------------------------
 def log_action(action, cause):

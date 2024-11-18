@@ -8,6 +8,7 @@ from time import sleep
 import logging
 
 import time
+import datetime
 import functions
 from multiprocessing import Process
 
@@ -20,9 +21,10 @@ pid = None
 
 
 def doorbell():
-    print('doorbell', time.time())
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S' )
+    print('doorbell', now) 
     logging.info('doorbell rung')
-    functions.text('doorbell rung')
+    functions.smail(f'doorbell rung at {now}')
 
 
 def raw_doorbell(channel):

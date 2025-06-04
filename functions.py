@@ -90,7 +90,6 @@ def smail(text, attach=None):
             "select contact from contacts where type = 'email' or type = 'text';")
         for contact in cur.fetchall():
             email = contact[0]
-            cmd = 'echo "' + text + '" | mail -s "ALARM" ' + email
             cmd = f'echo "{text}" | mail {attachfile} -s "ALARM" {email}'
             log_action("email " + email, "alarm:" + text)
             os.system(cmd)

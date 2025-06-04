@@ -2,6 +2,7 @@
 #
 # poll doorbell.  this will check battery status.
 #
+import os
 import RPi.GPIO as GPIO
 from signal import pause
 from time import sleep
@@ -21,10 +22,12 @@ pid = None
 
 
 def doorbell():
+    fname = '/home/pi/frontor.png' 
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S' )
     print('doorbell', now) 
     logging.info('doorbell rung')
-    functions.smail(f'doorbell rung at {now}')
+    os.system('/home/pi/get_image.sh >/dev/null')
+    functions.smail(f'doorbell rung at {now}', fname )
 
 
 def raw_doorbell(channel):
@@ -56,3 +59,6 @@ def start():
 def stop():
     logging.info('stopping doorbell listener')
     pid.terminate()
+ 
+if __name__ == '__main__':
+   doorbell()

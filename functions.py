@@ -74,21 +74,29 @@ def getGoogleHome(spkr='%'):
 
 
 # --------------------------------
-# send mail/text notifications
+# send mail/text notifications, possibly with attachment
 # --------------------------------
-def smail(text):
+def smail(text, attach=None):
     logging.info('mailing ' + text)
     conn = get_conn()
+
+    if attach is None:
+        attachfile = ''
+    else:
+        attachfile = f' -A "{attach}"'
+
     with conn.cursor() as cur:
         cur.execute(
             "select contact from contacts where type = 'email' or type = 'text';")
         for contact in cur.fetchall():
             email = contact[0]
             cmd = 'echo "' + text + '" | mail -s "ALARM" ' + email
+            cmd = f'echo "{text}" | mail {attachfile} -s "ALARM" {email}'
             log_action("email " + email, "alarm:" + text)
             os.system(cmd)
-            time.sleep(0.5)  # email system doesn't like too many messages/second
+            time.sleep(1.5)  # email system doesn't like too many messages/second
     conn.close()
+
 
 # --------------------------------
 # send text notifications

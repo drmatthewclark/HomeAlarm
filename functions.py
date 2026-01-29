@@ -22,7 +22,10 @@ Copyright Matthew Clark 2020
 import psycopg2 as psql
 import os
 import time
-import logging
+from logsetup import logsetup
+
+logger = logsetup('alarm-functions')
+
 
 # --------------------------------------------
 # encapusulate connection
@@ -30,12 +33,12 @@ import logging
 
 
 def get_conn():
-    logging.debug('connecting to database')
+    logger.debug('connecting to database')
     conn = None
     try:
         conn = psql.connect(user='alarm')
     except Exception as error:
-        logging.error('error connecting ' + str(error))
+        logger.error('error connecting ' + str(error))
 
     return conn
 
@@ -45,7 +48,7 @@ def get_conn():
 
 
 def get_status():
-    logging.debug('getting status')
+    logger.debug('getting status')
     conn = get_conn()
     with conn.cursor() as cur:
         cur.execute("select category, enabled from state;")
@@ -77,7 +80,7 @@ def getGoogleHome(spkr='%'):
 # send mail/text notifications, possibly with attachment
 # --------------------------------
 def smail(text, attach=None):
-    logging.info('mailing ' + text)
+    logger.info('mailing ' + text)
     conn = get_conn()
 
     if attach is None:
@@ -103,7 +106,7 @@ def smail(text, attach=None):
 
 
 def text(text):
-    logging.info('texting ' + text)
+    logger.info('texting ' + text)
     conn = get_conn()
     with conn.cursor() as cur:
         cur.execute("select contact from contacts where type = 'text';")
@@ -120,7 +123,7 @@ def text(text):
 # log an action into the db
 # ----------------------------
 def log_action(action, cause):
-    logging.info('action ' + action + ' ' + cause)
+    logger.info('action ' + action + ' ' + cause)
     sql = "insert into actions (action, cause) values (%s, %s);"
     tuple = (action, cause)
     conn = get_conn()
@@ -136,7 +139,7 @@ def log_action(action, cause):
 # set the trigger flag when alarm is triggered
 # -----------------------------------------------
 def trigger():
-    logging.info('alarm triggered')
+    logger.info('alarm triggered')
     cmd = "update state set enabled = true where category = 'triggered';"
     conn = get_conn()
     with conn.cursor() as cur:

@@ -29,7 +29,10 @@ import datetime
 import socket
 import functions
 import random
-import logging
+from logsetup import logsetup
+
+logger = logsetup('googlespeak')
+
 #
 # addresses of google home devices
 # broadcast_addresses = {"192.168.20.11", "192.168.20.97" , "192.168.20.18", "192.168.20.20"}
@@ -69,11 +72,11 @@ def makefile(say):
         cmd = '/usr/bin/pico2wave -w ' + lfname + ' "' + say + '"'
         print(cmd)
         os.system(cmd)
-        logging.debug('created sound file' + lfname)
+        logger.debug('created sound file' + lfname)
         fsize = os.path.getsize(lfname)
         if fsize == 0:
             fname = None
-            logging.error('file size was zero ' + lfname)
+            logger.error('file size was zero ' + lfname)
 
     return fname
 
@@ -95,8 +98,11 @@ def speak(ip, fname, volume):
         castdevice = pychromecast.get_chromecast_from_host(host)
     except:
         print('error contacting google device at ', ip)
-        logging.error('error contacting googledevice ' + str(ip))
+        logger.error('error contacting googledevice ' + str(ip))
         return
+
+    if castdevice is None:
+         return
 
     castdevice.wait()
     vol_previous = castdevice.status.volume_level
@@ -107,7 +113,7 @@ def speak(ip, fname, volume):
     mc.play_media(url, "audio/wav")
     mc.block_until_active()
     mc.pause()  # prepare audio and pause...
-    time.sleep(0.5)
+    time.sleep(0.25)
 
     # google volume is 0-1
     if not volume is None:
@@ -144,7 +150,7 @@ def main(say, volume):
 # --------------------------------
 
 
-def playmp3(soundfile, volume, spkr='%'):
+def playmp3(soundfile, volume=0.5, spkr='%'):
 
     if not soundfile.startswith(mp3dir):
         soundfile = mp3dir + soundfile
@@ -164,6 +170,10 @@ def playmp3(soundfile, volume, spkr='%'):
         broadcast_addresses = functions.getGoogleHome(spkr)
 
         for address in broadcast_addresses:
+
+            if '.97' in address:
+                continue
+
             if '.' in address:
                 p = Process(target=speak, args=(address, soundfile, volume))
                 p.start()
@@ -171,7 +181,7 @@ def playmp3(soundfile, volume, spkr='%'):
 
         time.sleep(1.0)
         for process in processes:
-            process.join()
+            process.join(2)
 
         time.sleep(1.0)
 
@@ -182,7 +192,7 @@ def playmp3(soundfile, volume, spkr='%'):
 
 def announce(text, volume=0.50, spkr='%'):
 
-    logging.info('announcing ' + text)
+    logger.info('announcing ' + text)
     # google volume range is 0-1
     if volume is None:
         volume = 0.5
@@ -193,3 +203,8 @@ def announce(text, volume=0.50, spkr='%'):
     print("announce: " + text, 'volume', volume, spkr)
     soundfile = makefile(text)
     playmp3(soundfile, volume, spkr)
+
+
+if __name__ == '__main__':
+   #playmp3('doorbell-1.wav')
+   pass

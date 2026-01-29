@@ -4,9 +4,11 @@ import paho.mqtt.client as mqtt
 import time
 import os
 import sys
-import logging
 import psycopg2
 from multiprocessing import Process
+from logsetup import logsetup
+
+logger = logsetup('alarm-bluetooth')
 
 # topic with status
 topic = 'home'
@@ -36,7 +38,7 @@ def decode_home(home):
 def on_message(client, userdata, message):
 
     msg = str(message.payload.decode("utf-8")).split(",")
-    logging.debug('recieved msg ' + message.payload.decode('utf-8'))
+    logger.debug('recieved msg ' + message.payload.decode('utf-8'))
     time = msg[0]
     locale = msg[1]
     person = msg[2]
@@ -60,16 +62,16 @@ def insert_record(values):
                 status = 'init'
                 home = 'False'
 
-            logging.debug('person ' + str(person) + ' status ' +
+            logger.debug('insert: person ' + str(person) + ' status ' +
                           str(status) + ' home ' + str(home))
 
             if status != home:
-                logging.debug('update db - ' + cur.mogrify(insert_sql, values).decode('utf-8'))
+                logger.debug('update db - ' + cur.mogrify(insert_sql, values).decode('utf-8'))
                 cur.execute(insert_sql, values)
                 con.commit()
 
     except:
-        logging.error("bluetooth insert_record error (" + str(time) + ',' + str(locale) + ',' + str(person) + ',' +str(home) + ')' +
+        logger.error("bluetooth insert_record error (" + str(time) + ',' + str(locale) + ',' + str(person) + ',' +str(home) + ')' +
                       ':' + str(sys.exc_info()[0]) + ':' + str(sys.exc_info()[1]))
     finally:
         con.close()
@@ -87,7 +89,7 @@ def main():
 
 
 def start():
-    logging.info('started bluetooth listener')
+    logger.info('started bluetooth listener')
     global process
     process = Process(target=main, name='bluetooth')
     process.start()
@@ -95,6 +97,6 @@ def start():
 
 def stop():
     global process
-    logging.info('stopping bluetooth listener')
+    logger.info('stopping bluetooth listener')
     client.stop()
     process.terminate()

@@ -7,14 +7,14 @@
 [Unit]
 Description=alarm system service
 After=network.target
-StartLimitIntervalSec=0
+StartLimitIntervalSec=5
 
 [Service]
 Type=simple
 User=pi
 
 Restart=always
-RestartSec=1
+RestartSec=10
 
 ExecStart=/home/pi/HomeAlarm/convert.py
 KillSignal = 9

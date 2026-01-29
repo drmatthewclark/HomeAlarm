@@ -7,14 +7,15 @@
 <?php include "6dc91608-c991-11e9-a32f-2a2ae2dbcce4-styles.php"  ?>
 
 <?php
+ session_start();
 
  $start = time();
   try {
     $link = pg_pconnect("dbname=alarm user=alarm");
-    pg_query($link, "set statement_timeout to 5000;" );
+    pg_query($link, "set statement_timeout to 7000;" );
     if (!isset($tlink)) {
       $tlink = pg_pconnect("user=sensor host=pi");
-      pg_query($tlink, "set statement_timeout to 5000;" );
+      pg_query($tlink, "set statement_timeout to 7000;" );
     }
   } catch (Exception $e) {
 	echo "Exception ", $e->getMessage(), "\n";
@@ -49,21 +50,18 @@
 	echo "Exception ", $f->getMessage(), "\n";
   }
 
-  ?>
+  echo '<body bgcolor="white">';
+  echo '<h0>';
+  echo '  Security Control';
+  echo '</h0>';
 
-
-  <body bgcolor="white">
-  <h0>
-    Security Control
-  </h0>
-
-  <?php
   if ($trigger_status == 't') {
 	  echo "<input type='button' class='button' name='reset' value='reset alarm'>";
   };
   echo "<br><br>";
   echo date("d M Y h:i a");   
   echo "<br><br><br>";
+
   ?>
 
   <label class="switch" name="door">
@@ -96,6 +94,7 @@
   <h1>STATUS:<h1> 
 
   <?php
+
      $offline = pg_query($link, "select source from status where time < (current_timestamp - interval '3 day');");
      $numoffline = pg_numrows($offline);
 
@@ -207,7 +206,7 @@
      echo "<th>Person</th>";
      echo "<th>House</th>";
      echo "</tr>";
-     $pq = "select to_char(time, 'dd Mon yyyy hh24:mi'::text) AS time, person, location from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home=true;";
+     $pq = "select to_char(time, 'dd Mon yyyy hh12:mi am'::text) AS time, person, location from (select distinct on (person,location) time, person, location, home from bluetooth order by person, location, time desc) a where home=true;";
      $home = pg_query($link, $pq);
      $numrows = pg_numrows($home);
   
@@ -223,6 +222,7 @@
      echo "</table>";
      echo time()-$start;
      pg_close($link);
+
   ?>
 
 

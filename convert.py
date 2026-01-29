@@ -39,10 +39,12 @@ from pathlib import Path
 import temperature_warning as temp_warn
 import bluetooth as blue
 import doorbell
-import logging
-logging.basicConfig(level=logging.INFO)
+from logsetup import logsetup
+
+logger = logsetup('alarm')
 
 radioprocess = None
+
 #
 # initialize the status bits for Honeywell sensors
 #
@@ -103,16 +105,16 @@ def readDevices():
 
 
 def process(line):
-
+    logger.debug(line)
     global lastalert
     guard_gap = 3.5  # seconds
     flag = False
-    logging.debug('data: ' + line)
+    logger.debug('data: ' + line)
 
     try:
         parsed = json.loads(line)
     except:
-        logging.error("convert.py: error parsing json: " + line)
+        logger.error("convert.py: error parsing json: " + line)
         return
 
     deviceId = parsed["id"]
@@ -163,7 +165,7 @@ def process(line):
         if (status[val] & device["code"] == 0 and (status[val] & eventCode) != 0):
             status_result = status_result + "," + val
 
-    logging.debug("status: " + status_result)
+    logger.debug("status: " + status_result)
 
     # save the event into the database
     sql = "insert into events(source, event, code, flag) values( %s, %s, %s, %s)"
@@ -176,7 +178,7 @@ def process(line):
     conn.commit()
     conn.close()
 
-    logging.debug(deviceName + " flag:" + str(flag) + " " + line)
+    logger.debug('insert ' + deviceName + " flag:" + str(flag) + " " + line)
 
     # if action is warranted:
     #
@@ -213,7 +215,7 @@ def startThread(funcname, args):
     else:
         arg = str(args)
 
-    logging.debug("start action thread " + funcname.__name__ + " " + arg)
+    logger.debug("start action thread " + funcname.__name__ + " " + arg)
 
     Process(target=funcname, args=args).start()
 
@@ -236,7 +238,7 @@ def killsignal(signalNumber, frame):
     except:
         pass
 
-    logging.info("handling SIGTERM")
+    logger.info("handling SIGTERM")
 
 
 # -------------------------
@@ -245,7 +247,7 @@ def killsignal(signalNumber, frame):
 def main():
     signal.signal(signal.SIGTERM, killsignal)
 
-    logging.info('alarm process starting')
+    logger.info('alarm process starting')
 
     # start temperature monitor
     temp_warn.start()
@@ -261,19 +263,26 @@ def main():
 
     # command to start radio
     #
-    cmd = "rtl_433 -p 0 -f 345000000 -s 1M -R 70 -F json"
+    #cmd = "rtl_433 -p 0 -f 345000000 -s 1M -R 70 -F json"
+    cmd = "rtl_433 -f 345.00MHz -F json -g auto -R70"
 
     radioprocess = subprocess.Popen(shlex.split(
-        cmd), bufsize=1, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-    while radioprocess.poll() == None:
-        line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
-        process(line)
+        cmd), bufsize=1, text=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
-    logging.error('alarm main loop ended')
+    assert not radioprocess is None
+
+    while radioprocess.poll() is None:
+        logger.debug('polling ...' )
+        #line = radioprocess.stdout.readline().decode("UTF-8").rstrip()
+        line = radioprocess.stdout.readline().rstrip()
+        process(line)
+        logger.debug('polling ' + line)
+
+    logger.error('alarm main loop ended')
 
 
 if __name__ == "__main__":
     # save this
     original_sigint_handler = signal.getsignal(signal.SIGINT)
-    logging.info('alarm started')
+    logger.info('alarm started')
     main()
